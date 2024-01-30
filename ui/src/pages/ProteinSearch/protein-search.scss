@@ -1,0 +1,289 @@
+$color_1: #999;
+$color_2: #bbb;
+$color_3: #eee;
+$color_4: #888;
+$color_5: white;
+$color_6: rgba(255,255,255,0.5);
+$background-color_1: #423a43;
+$background-color_2: #3b3b3b;
+$background-color_3: transparent;
+$background-color_4: rgba(0, 0, 0, 0.03);
+$border-color_1: #423a43;
+$border-color_2: #dc3545;
+
+:root {
+    --search-transition-func: ease-in-out;
+    --search-transition-length: 0.5s;
+}
+
+.custom-container {
+    width: 100%;
+    margin: 0 auto;
+}
+
+.ref-container {
+    // height: 100%;
+    // max-height: 240px;
+}
+
+.control-hint-btn {
+    color: $color_1;
+    font-size: 1.4rem;
+}
+
+.search-info {
+    form {
+        width: 100%;
+
+        .form-control {
+            border-color: $border-color_1;
+            border-left: 0;
+            font-size: 1.5rem;
+            border-radius: 0 10px 10px 0;
+            background-position: right calc(.375em + .1875rem) center;
+
+            &:focus {
+                box-shadow: none;
+            }
+
+            &::placeholder {
+                color: $color_2;
+            }
+        }
+
+        .input-group-text {
+            border-color: $border-color_1;
+            font-size: 1.15rem;
+            background: white;
+            color: $color_2;
+        }
+    }
+    .input-group-text {
+        border-radius: 10px 0 0 10px;
+        padding: .375rem 1rem;
+
+        &:hover {
+            cursor: pointer;
+            background-color: $background-color_1;
+            color: $color_3;
+        }
+    }
+
+    .form-control.is-invalid {
+        border-color: $border-color_2;
+    }
+
+    .input-group-text.is-invalid {
+        border-color: $border-color_2;
+    }
+
+    .form-label {
+        font-size: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+}
+
+.query-info-container {
+    display: flex;
+    align-items: center;
+}
+
+table.table {
+    margin-bottom: 0;
+}
+
+.table-pre {
+    overflow-x: hidden;
+    font-size: 1.05rem;
+    margin-top: 3rem;
+    margin-bottom: 0.75rem;
+}
+
+.table-post {
+    overflow-x: hidden;
+    font-size: 1.05rem;
+    margin-top: 0.75rem;
+}
+
+.disabled {
+    color: $color_4;
+}
+
+.protein-table {
+    thead {
+        th {
+            background-color: $background-color_2;
+            color: $color_3;
+            text-transform: capitalize;
+            font-weight: 600;
+            padding: 0.5rem 0.75rem;
+            vertical-align: top;
+            font-size: 1rem;
+
+            .filter {
+                border-bottom: 1px solid white;
+                border-top: 0;
+                border-left: 0;
+                border-right: 0;
+                background-color: $background-color_3;
+                border-radius: 0;
+                padding: 0;
+                color: $color_5;
+                max-width: 300px;
+
+                &::placeholder {
+                    color: $color_6;
+                }
+
+                &:focus {
+                    box-shadow: none;
+                }
+            }
+            .sort-icon {
+                display: inline-block;
+                margin-left: 0.5rem;
+                width: 25px;
+            }
+        }
+
+        tr {
+            &:first-child {
+                th {
+                    text-align: center;
+                    padding-bottom: 0;
+
+                    &:first-child {
+                        border-top-left-radius: 10px;
+                    }
+
+                    &:last-child {
+                        border-top-right-radius: 10px;
+                    }
+                }
+            }
+        }
+    }
+
+    tbody {
+        td {
+            vertical-align: middle;
+            padding: 0.25rem 0.75rem;
+            font-size: 1rem;
+            height: 35px;
+        }
+    }
+}
+.table-striped {
+    > tbody {
+        > tr {
+            &:nth-of-type(2n+1) {
+                > * {
+                    background-color: $background-color_4;
+                }
+            }
+        }
+    }
+}
+
+.placeholder-glow {
+    margin-bottom: 0;
+}
+
+.cursor-pointer {
+    cursor: pointer;
+}
+
+/* Unused */
+/* @media (min-width: 576px) {} */
+/* @media (min-width: 992px) {
+    .search-info .form-label {
+        font-size: 2.5rem;
+    }
+} */
+
+@media (min-width: 768px) {
+    .search-info {
+        form {
+            text-align: center;
+
+            .input-group {
+                max-width: 400px;
+                margin: 0 auto;
+            }
+        }
+    }
+}
+
+@media (min-width: 1200px) {
+    .custom-container {
+        width: 90%;
+    }
+
+    .search-info {
+        > div {
+            &:nth-child(1) {
+                order: 2;
+            }
+
+            &:nth-child(2) {
+                order: 1;
+            }
+
+            &:nth-child(3) {
+                order: 3;
+            }
+        }
+
+        form {
+            margin-top: 0;
+            transition: all var(--search-transition-func) var(--search-transition-length);
+        }
+
+        .form-label {
+            font-size: 1.4rem;
+            transition: font-size var(--search-transition-func) var(--search-transition-length);
+        }
+
+        .form-control {
+            transition: all var(--search-transition-func) var(--search-transition-length);
+        }
+
+        .input-group-text {
+            transition: all var(--search-transition-func) var(--search-transition-length);
+        }
+
+        .input-group {
+            transition: all var(--search-transition-func) var(--search-transition-length);
+        }
+
+        .large {
+            margin-top: 4vh;
+
+            .form-label {
+                font-size: 1.7rem;
+            }
+
+            .input-group {
+                max-width: 450px;
+            }
+
+            .form-control {
+                padding: 0.5rem 1.5rem;
+                border-radius: 0 15px 15px 0;
+                font-size: 1.6rem;
+            }
+
+            .input-group-text {
+                padding: 0.5rem 1.15rem;
+                border-radius: 15px 0 0 15px;
+                font-size: 1.5rem;
+            }
+        }
+    }
+}
+
+@media (min-width: 1600px) {
+    .custom-container {
+        width: 80%;
+    }
+}

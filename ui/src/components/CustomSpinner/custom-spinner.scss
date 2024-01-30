@@ -1,0 +1,28 @@
+.custom-spinner {
+    margin: 1.5rem 0;
+    flex-wrap: wrap;
+}
+
+.custom-spinner .meta {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    margin-top: 1.25rem;
+    margin-left: 0;
+    flex-direction: column;
+}
+
+.custom-spinner > * {
+    width: 100%;
+}
+
+@media (min-width: 576px) {
+    .custom-spinner > * {
+        width: auto;
+    }
+
+    .custom-spinner .meta {
+        margin-top: 0;
+        margin-left: 1.5rem;
+    }
+}

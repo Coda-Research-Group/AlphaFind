@@ -1,0 +1,10 @@
+pandas
+numpy
+faiss-cpu
+psutil
+wandb
+h5py
+torch-summary
+flask
+gunicorn
+prometheus-client

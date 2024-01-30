@@ -1,0 +1,6 @@
+# Set the default behavior for all files
+* text=auto
+
+# Explicitly declare files that will always have Unix-style line endings
+*.sh text eol=lf
+*.py text eol=lf

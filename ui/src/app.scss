@@ -1,0 +1,97 @@
+$color_1: inherit;
+$color_2: #0d6efd;
+$background-color_1: #00000011;
+
+/* body {
+    background-color: #f8f9fa;
+} */
+/* .main-container {
+        min-height: calc(100vh - 56px);
+} */
+
+
+body {
+    position: relative;
+}
+
+.main-container {
+    min-height: 100vh;
+}
+
+main {
+    > article {
+        padding: 1rem 1rem 5rem;
+
+        header {
+            margin-bottom: 1rem;
+
+            h2 {
+                margin-bottom: 0;
+                font-size: 2rem;
+            }
+        }
+
+        section {
+            margin-bottom: 1rem;
+
+            h3 {
+                margin: 1.5rem 0 0.85rem;
+                font-size: 1.65rem;
+            }
+        }
+
+        footer {
+            margin-bottom: 1rem;
+        }
+    }
+}
+
+ul.react-autocomplete-input {
+    top: 100% !important;
+    left: 0 !important;
+    width: 100%;
+    border-radius: 10px !important;
+    padding: 0.5rem 0 !important;
+    font-size: 1.1rem;
+
+    li {
+        padding: 0.3rem 1rem;
+    }
+
+    li.active {
+        background-color: $background-color_1;
+        color: $color_1;
+    }
+}
+
+.title-color {
+    color: $color_2;
+}
+
+@media (min-width: 992px) {
+    main {
+        > .container {
+            max-width: 950px;
+        }
+
+        > article {
+            header {
+                margin-top: 1rem;
+                margin-bottom: 2rem;
+
+                h2 {
+                    font-size: 2.5rem;
+                }
+            }
+
+            section {
+                font-size: 1.2rem;
+                margin-bottom: 2rem;
+            }
+            
+            footer {
+                margin-bottom: 2rem;
+            }
+        }
+    }
+}

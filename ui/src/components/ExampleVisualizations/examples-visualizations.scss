@@ -1,0 +1,9 @@
+.examples {
+    transition: height 0.3s ease;
+    margin-top: 2rem;
+    overflow-y: hidden;
+}
+
+.examples.hidden {
+    height: 0;
+}

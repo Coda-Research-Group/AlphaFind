@@ -1,0 +1,10 @@
+.description {
+    min-height: 150px;
+    transition: all 0.2s ease;
+    overflow-y: hidden;
+}
+
+.description.hidden {
+    min-height: 0;
+    height: 0;
+}

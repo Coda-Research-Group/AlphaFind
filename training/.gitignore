@@ -1,0 +1,13 @@
+__pycache__/
+.ipynb_checkpoints/
+wandb/
+.idea/
+config_.yaml
+pod_.yaml
+secret.yaml
+kubectl
+*.h5
+data/bucket-*
+data/embedding.pkl
+data/kmeans.idx
+models/

@@ -1,0 +1,31 @@
+.protein-table .expand-all {
+    padding: 0;
+    border: none;
+    margin-right: 0.5rem;
+    color: white;
+    height: 18px;
+}
+
+.protein-table .expand-all:hover {
+    color: inherit;
+}
+
+.protein-table .expand-all svg {
+    transform: translateY(-9px);
+}
+
+.protein-table thead th.uniProtId > div {
+    min-width: 130px;
+}
+
+.protein-table thead th.tmScore > div {
+    min-width: 130px;
+}
+
+.protein-table thead th.rmsd > div {
+    min-width: 130px;
+}
+
+.protein-table thead th.alignedLength > div {
+    min-width: 150px;
+}

@@ -1,0 +1,16 @@
+pandas
+pillow
+keras
+scikit-learn
+matplotlib
+numpy
+pandas
+pyyaml
+kaleido
+faiss-cpu
+py-cpuinfo
+psutil
+wandb
+tqdm
+h5py
+torch-summary

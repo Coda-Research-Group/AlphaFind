@@ -1,0 +1,60 @@
+$color_1: inherit;
+
+.custom-modal {
+    .modal-title {
+        font-size: 1rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0 1rem;
+        flex-wrap: wrap;
+        >* {
+            width: 100%;
+            margin: 0.25rem 0;
+        }
+        a {
+            display: inline-flex;
+            text-decoration: none;
+            color: $color_1;
+        }
+        img {
+            max-height: 26px;
+            margin-left: 0.5rem;
+        }
+    }
+}
+.comparison-3d {
+    max-width: 100%;
+    height: 100%;
+}
+.controls-info-btn {
+    text-decoration: none;
+    color: $color_1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: flex-start;
+    padding: 0;
+    svg {
+        margin-right: 0.5rem;
+    }
+    &:hover {
+        color: $color_1;
+    }
+}
+@media (min-width: 576px) {
+    .custom-modal {
+        .modal-title {
+            height: 45px;
+            flex-wrap: nowrap;
+            >* {
+                width: auto;
+                margin: 0;
+            }
+        }
+    }
+}
+@media (min-width: 1200px) {
+    .comparison-3d {
+        height: 450px;
+    }
+}
