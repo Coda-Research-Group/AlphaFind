@@ -4,7 +4,7 @@ import { Record } from "./ProteinTable";
 import { displayPercentage } from "../../common/utils";
 
 function makeHeader() {
-    return `UniProtID;Name;Organism;TM-Score;RMSD;Aligned Residues\n`;
+    return `UniProtID;Name;Organism;TM-Score;RMSD;Aligned Residues;Taxonomy ID;Experimental PDB IDs;Sequence;Gene;Is Reviewed (SwissProt)\n`;
 }
 
 function prepareDataForExport(data: Row<Record>[]) {
@@ -16,10 +16,11 @@ function prepareDataForExport(data: Row<Record>[]) {
         const tmScore: string = (row.getValue("tmScore") as number).toFixed(4);
         const rmsd: string = (row.getValue("rmsd") as number).toFixed(3);
         const aligned_residues: string = displayPercentage(row.getValue("alignedLength"));
-        
+        const experimentalStructures = row.original.experimentalStructures === null ? "[]" : JSON.stringify(row.original.experimentalStructures);        
         
 
-        output += `${row.getValue("uniProtId")};${row.original.name};${row.getValue("organism")};${tmScore};${rmsd};${aligned_residues}`;
+        output += `${row.original.uniProtId};"${row.original.name}";"${row.original.organism}";${tmScore};${rmsd};${aligned_residues};`;
+        output += `${row.original.taxId};${experimentalStructures};${row.original.sequence};${row.original.gene};${row.original.isReviewed}`;
 
         if (i < data.length - 1)
             output += "\n";

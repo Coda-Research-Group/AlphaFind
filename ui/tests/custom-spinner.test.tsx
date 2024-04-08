@@ -6,7 +6,7 @@ describe('CustomSpinner', () => {
     it('0', () => {
         const queue = {
             position: 10,
-            readyUrl: 'http://localhost:5173/search?q=I1VZV6',
+            readyUrl: 'http://localhost:5173/search?q=P69905',
             estimatedTime: 1
         };
 

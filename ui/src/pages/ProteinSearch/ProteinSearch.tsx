@@ -1,4 +1,4 @@
-import { FormEvent, createContext, useCallback, useEffect, useRef, useState } from "react";
+import { FormEvent, createContext, useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { Col, Container, Row } from "react-bootstrap";
 import 'react-autocomplete-input/dist/bundle.css';
 import { useQuery } from "@tanstack/react-query";
@@ -7,18 +7,19 @@ import "./protein-search.scss";
 import { calcEstimatedSearchTime, calcOffsetLimit, useUrlParams } from "../../common/utils";
 import SearchInput from "../../components/SearchInput";
 import ProteinVisualizer from "../../components/ProteinVisualizer";
-import LoadInfoBox from "../../components/LoadInfoBox";
 import CustomSpinner from "../../components/CustomSpinner";
 import ProteinTable from "../../components/ProteinTable";
 import LoadMoreButton from "../../components/LoadMoreButton";
 import { LoadingState, Representation } from "../../common/enums";
-import { fetchData, fetchQueryObjectMetadata } from "./data-loading";
-import { Record } from "../../components/ProteinTable/ProteinTable";
+import { fetchData, fetchExperimentalStructures, fetchQueryObjectMetadata } from "../../data/dataLoading";
+import { ExperimentalStructuresModalAttributes, Record } from "../../components/ProteinTable/ProteinTable";
+import SearchMetaBox from "../../components/SearchMetaBox";
+import ExperimentalStructuresModal from "../../components/ExperimentalStructuresModal";
 
 export const DEFAULT_LIMIT = 50;
 export const MAX_LIMIT = 1_000;
 
-type SearchResult = {
+export type SearchResult = {
     data: Record[];
     meta: {
         searchTime: number;
@@ -31,7 +32,6 @@ export type QueryObject = {
     organism: string;
 };
 
-export type onSearchHeader = (event: FormEvent, value: string | undefined) => void;
 export type onLoadMoreHeader = (count: number) => void;
 
 export const QueryObjectContext = createContext<QueryObject>({
@@ -58,6 +58,10 @@ function renderNoResults(isQueryValidUniProtID: boolean, isInAlphaFoldDB: boolea
 export function ProteinSearch() {
     const [inputValue, setInputValue] = useState("");
     const searchParams = useRef<[string, number]>(["", DEFAULT_LIMIT]);
+    // Helper value that holds the mapped UniProt ID
+    // Used to check whether mapping has been performed successfully and to prevent
+    // repetitive mapping calls
+    const mappedUniProtId = useRef<string | null>(null);
 
     const [loadingState, setLoadingState] = useState<LoadingState>(LoadingState.Overview);
     const [isLoadingMore, setIsLoadingMore] = useState(false);
@@ -71,10 +75,12 @@ export function ProteinSearch() {
     });
 
     const [urlParams, setUrlParams] = useUrlParams();
+    
+    const [experimentalStructuresModalValue, setExperimentalStructuresModalValue] = useState<ExperimentalStructuresModalAttributes>(null);
 
     const dataQ = useQuery({
         queryKey: ["data", searchParams.current[0], searchParams.current[1]],
-        queryFn: () => fetchData(searchParams.current[0], searchResult.data, searchParams.current[1]),
+        queryFn: () => fetchData(searchParams.current, searchResult.data, mappedUniProtId.current),
         refetchOnWindowFocus: false,
         refetchOnMount: false,
         refetchOnReconnect: false,
@@ -83,17 +89,14 @@ export function ProteinSearch() {
         staleTime: 1e15,
     });
 
-    const originalSearchValue = dataQ.data?.originalSearchValue ?? searchParams.current[0];
-
     const queryMetadataQ = useQuery({
-        queryKey: ["queryObjectMetadata", originalSearchValue],
-        queryFn: () => fetchQueryObjectMetadata(originalSearchValue),
+        queryKey: ["queryObjectMetadata", mappedUniProtId.current],
+        queryFn: () => fetchQueryObjectMetadata(mappedUniProtId.current!),
         refetchOnWindowFocus: false,
         refetchOnMount: false,
-        enabled: dataQ.data !== undefined && dataQ.data.data.length > 0,
+        enabled: mappedUniProtId.current !== null,
         retry: false,
     });
-
 
     /**
      * Responsible for handling the data from the main query.
@@ -112,16 +115,15 @@ export function ProteinSearch() {
             return;
         }
 
+        // Saved (possibly mapped) UniProt ID
+        mappedUniProtId.current = dataQ.data?.originalSearchValue;
+
         // QUEUE
         if (dataQ.data?.queuePosition !== undefined) {
             let refetchTimer: NodeJS.Timeout;
 
             if (!isLoadingMore)
                 setLoadingState(LoadingState.WaitingInQueue);
-
-            if (searchParams.current[0] !== dataQ.data?.originalSearchValue)
-                searchParams.current[0] = dataQ.data?.originalSearchValue;
-            
 
             const queuePosition = dataQ.data.queuePosition;
             if (queuePosition <= 5)
@@ -132,6 +134,7 @@ export function ProteinSearch() {
             return () => clearTimeout(refetchTimer);
         } else if (dataQ.data.data.length === 0) {
             // NO RESULTS - wrong input
+            mappedUniProtId.current = null;
             setLoadingState(LoadingState.ShowingResults);
             setSearchResult({
                 data: [],
@@ -143,11 +146,17 @@ export function ProteinSearch() {
             return;
         }
 
+        // Prevent recalculation of search time when not needed
+        const searchTime = (
+                searchResult.meta.searchTime === 0 ||
+                isLoadingMore
+            ) ? (performance.now() - timerStart.current) / 1000 : searchResult.meta.searchTime;
+
         // RESULTS
         setSearchResult({
             data: dataQ.data.data,
             meta: {
-                searchTime: (performance.now() - timerStart.current) / 1000,
+                searchTime: searchTime,
             }
         });
 
@@ -157,21 +166,17 @@ export function ProteinSearch() {
         }
 
         setLoadingState(LoadingState.ShowingResults);
-
+        
         return () => {};
-    }, [JSON.stringify(dataQ.data), dataQ.status, dataQ.fetchStatus]);
+    }, [JSON.stringify(dataQ.data), dataQ.status, dataQ.fetchStatus]); 
 
-    const queryObject: QueryObject = {
-        uniProtId: originalSearchValue,
-        name: queryMetadataQ.data?.name ?? "-",
-        organism: queryMetadataQ.data?.organism ?? "-",
-    };
-    // Reset query object if the search value is not valid
-    if (searchResult.data.length === 0) {
-        queryObject.name = "";
-        queryObject.uniProtId = "";
-        queryObject.organism = "";
-    }
+    useEffect(() => {
+        if (searchResult.data.length === 0)
+            return;
+         
+        fetchExperimentalStructures(searchResult.data, setSearchResult, searchParams);
+    }, [searchParams.current[0], searchResult.data.length]);
+    
 
     /** 
      * This is a fix for a bug where the window is unfocused and the user is in the queue.
@@ -196,29 +201,69 @@ export function ProteinSearch() {
      * First use case is when the user uses URl with defined params -> automatic search
      * is performed.
      * 
-     * Second use case is when the URL params change (e.g. user changes the URL manually).
+     * Second use case is when the URL params change (e.g. user changes the URL manually)
+     * e.g., browser back/forward buttons
      */
     useEffect(() => {
-        if (loadingState !== LoadingState.Overview)
-            return;
+        if (urlParams.searchQuery === null) {
+            // Reset everything
+            setInputValue("");
+            setLoadingState(LoadingState.Overview);
+            setSearchResult({
+                data: [],
+                meta: {
+                    searchTime: 0,
+                }
+            });
+            mappedUniProtId.current = null;
+            searchParams.current = ["", DEFAULT_LIMIT];
 
-        if (urlParams.searchQuery === null)
             return;
-
+        }
+        
         // Match typeable input with URL
-        if (urlParams.searchQuery !== inputValue)
+        if (urlParams.searchQuery.toLowerCase() !== inputValue)
             setInputValue(urlParams.searchQuery);
 
-        const searchQuery = urlParams.searchQuery;
-        const timeoutPointer = setTimeout(() => {
+        let timeoutPointer: NodeJS.Timeout;
+        if (loadingState === LoadingState.Overview) {
+            timeoutPointer = setTimeout(() => {
+                timerStart.current = performance.now();
+                setLoadingState(LoadingState.Fetching);
+
+                // searchQuery is indeed defined, not null string
+                searchParams.current = [urlParams.searchQuery!, urlParams.limit !== null ? urlParams.limit : DEFAULT_LIMIT];
+                mappedUniProtId.current = null;
+            }, 800);
+        }
+
+        // Following code is preparation for full handling of browser back/forward actions
+        /* if (loadingState === LoadingState.Fetching || loadingState === LoadingState.WaitingInQueue) {
             timerStart.current = performance.now();
             setLoadingState(LoadingState.Fetching);
 
-            searchParams.current = [searchQuery, urlParams.limit !== null ? urlParams.limit : DEFAULT_LIMIT];
-        }, 800);
+            // searchQuery is indeed defined, not null string
+            searchParams.current = [urlParams.searchQuery!, urlParams.limit !== null ? urlParams.limit : DEFAULT_LIMIT];
+            mappedUniProtId.current = null;
+        } else {
+            // loadingState === LoadingState.ShowingResults
+            console.log(urlParams);
+            
+            if (isLoadingMore)
+                searchParams.current[1] = urlParams.limit !== null ? urlParams.limit : DEFAULT_LIMIT;
+        } */
 
         return () => clearTimeout(timeoutPointer);
     }, [urlParams.searchQuery, urlParams.limit]);
+
+    // Added support for changing the title of the page
+    useLayoutEffect(() => {
+        let title = `${import.meta.env.VITE_TITLE}`;
+        if (searchParams.current[0].length > 0)
+            title += ` | ${searchParams.current[0]}`;
+
+        document.title = title;
+    }, [searchParams.current[0]]);
 
     /**
      * Main entrypoint for the search.
@@ -246,7 +291,8 @@ export function ProteinSearch() {
         timerStart.current = performance.now();
         // Trigger search
         searchParams.current = [parsedInputValue, DEFAULT_LIMIT];
-    }, [inputValue, searchParams.current[0]]);
+        mappedUniProtId.current = null;
+    }, [inputValue]);
 
     /**
      * Entrypoint for loading more results (pressing the button)
@@ -256,11 +302,18 @@ export function ProteinSearch() {
 
         const newLimit = searchParams.current[1] + count;
 
-        setUrlParams(queryObject.uniProtId, newLimit);
+        setUrlParams(searchParams.current[0], newLimit);
 
         timerStart.current = performance.now();
         searchParams.current[1] = newLimit;
-    }, [queryObject.uniProtId, searchParams.current[1]]);
+    }, [searchParams.current[0], searchParams.current[1]]);
+
+    // QUERY OBJECT
+    const queryObject: QueryObject = {
+        uniProtId: mappedUniProtId.current ?? "",
+        name: queryMetadataQ.data?.name ?? "",
+        organism: queryMetadataQ.data?.organism ?? "",
+    };
 
     // SHORTCUTS for RENDERING
     const isQueryValidUniProtID = dataQ.data?.isValueValidUniProtID ?? true;
@@ -287,9 +340,13 @@ export function ProteinSearch() {
 
     const emptyResults = searchResult.data.length === 0;
     const isLoading = dataQ.isFetching || isLoadingMore || isFetchingState || isWaitingInQueueState;
-
+    
     return (
         <QueryObjectContext.Provider value={queryObject}>
+            <ExperimentalStructuresModal
+                attrs={experimentalStructuresModalValue}
+                onHide={() => setExperimentalStructuresModalValue(null)}
+            />
             <article>
                 <section>
                     <Container>
@@ -313,10 +370,11 @@ export function ProteinSearch() {
                                 />}
                             </Col>
                             <Col xs="12" md="6" xl="4" className="query-info-container">
-                                {!isOverviewState && <LoadInfoBox
+                                {!isOverviewState && <SearchMetaBox
                                     loading={isLoading}
                                     originalInput={searchParams.current[0]}
                                     searchTime={searchResult.meta.searchTime}
+                                    setExperimentalStructuresModalValue={setExperimentalStructuresModalValue}
                                 />}
                             </Col>
                         </Row>
@@ -325,7 +383,7 @@ export function ProteinSearch() {
 
                         {isShowingResultsState && (
                             !emptyResults ? (<>
-                                <ProteinTable data={searchResult.data} />
+                                <ProteinTable data={searchResult.data} setExperimentalStructuresModalValue={setExperimentalStructuresModalValue} />
                                 <LoadMoreButton loadMoreFn={loadMore} isLoading={isLoadingMoreFeedback} queue={queueInfo} currentDataLength={searchResult.data.length} />
                             </>) : renderNoResults(isQueryValidUniProtID, isInAlphaFoldDB)
                         )}

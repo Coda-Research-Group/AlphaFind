@@ -1,9 +1,6 @@
-import { Button, OverlayTrigger, Tooltip } from "react-bootstrap";
-import { CustomCellContext, Record } from "../../components/ProteinTable/ProteinTable";
+import { OverlayTrigger, Tooltip } from "react-bootstrap";
+import { Record } from "../../components/ProteinTable/ProteinTable";
 import { createColumnHelper, Row as TableRow } from "@tanstack/react-table";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faMagnifyingGlass, faObjectUngroup } from "@fortawesome/free-solid-svg-icons";
-import { createSearchParams } from "react-router-dom";
 import { displayPercentage } from "../../common/utils";
 
 function getBestRow(rows: TableRow<Record>[]): TableRow<Record> {
@@ -20,14 +17,6 @@ function getBestRow(rows: TableRow<Record>[]): TableRow<Record> {
     }
 
     return rows[minIndex];
-}
-
-function makeSearchSimilarUrl(value: string) {
-    return `search?${
-        createSearchParams({
-            q: value as string,
-        })
-    }`;
 }
 
 const columnHelper = createColumnHelper<Record>();
@@ -67,16 +56,8 @@ export const columns = [
     organismCol,
     columnHelper.accessor('uniProtId', {
         header: () => <>UniProt ID</>,
-        cell: context => (
-            context.row.original.uniProtId === null
-            ? (<i>Unknown</i>)
-            : (<a href={ 'https://alphafold.ebi.ac.uk/entry/' + context.row.original.uniProtId} target="_blank" rel="noreferrer">{context.row.original.uniProtId}</a>)
-        ),
-        aggregatedCell: context => (
-            context.row.original.uniProtId === null
-            ? (<i>Unknown</i>)
-            : (<a href={ 'https://alphafold.ebi.ac.uk/entry/' + context.getValue()} target="_blank" rel="noreferrer">{context.getValue()}</a>)
-        ),
+        cell: context => context.getValue(),
+        aggregatedCell: context => context.getValue(),
         enableColumnFilter: true,
         aggregationFn: (_, childRows) => getBestRow(childRows).getValue('uniProtId'),
         sortingFn: (rowA, rowB) => {
@@ -191,19 +172,6 @@ export const columns = [
 
     columnHelper.display({
         header: () => <>Superposition</>,
-        id: "actions",
-        cell: context => {
-            const contextCasted = context as CustomCellContext;
-
-            return (
-                <div style={{minWidth: 80 + "px"}}>
-                    {contextCasted.row.original.uniProtId !== null ?
-                    (<>
-                        <Button className="show-3d p-0 mx-2" onClick={contextCasted.meta.onClickModal} variant="link" rel="noreferrer"><FontAwesomeIcon icon={faObjectUngroup} /></Button>
-                        <Button className="p-0 mx-2" href={makeSearchSimilarUrl(contextCasted.row.original.uniProtId)} target="_blank" rel="noreferrer" variant="link"><FontAwesomeIcon icon={faMagnifyingGlass} /></Button>
-                    </>): undefined}
-                </div>
-            );
-        },
+        id: "actions", 
     }),
 ];

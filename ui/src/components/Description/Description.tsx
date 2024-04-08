@@ -15,6 +15,9 @@ export const Description = memo(() => {
                 3D visualizations of the structural superposition of the proteins are provided, and text filters can be used to find specific organisms or Uniprot IDs.
                 For details about the methodology and usage, please see the <a href="https://github.com/Coda-Research-Group/AlphaFind/wiki/Manual" target="_blank" rel="noreferrer">manual</a>.
                 This website is free and open to all users and there is no login requirement.
+                <hr />
+                If you found <strong>Alpha<span className="title-color">Find</span></strong> helpful, please cite: <i>Procházka, D., Slanináková, T., Oľha, J., Rošinec, A., Grešová, K., Jánošová, M., Čillík, J., Porubská, J., Svobodová, R., Dohnal, V., & Antol, M. (2024). <a href="https://www.biorxiv.org/content/10.1101/2024.02.15.580465v1">AlphaFind: Discover structure similarity across the entire known proteome.</a></i> Are you interested in a research collaboration? Feel free to <a href="mailto:slaninakova@mail.muni.cz">contact us</a>.
+                <hr />
             </p>
         </div>
     );

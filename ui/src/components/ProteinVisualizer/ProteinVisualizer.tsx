@@ -1,6 +1,6 @@
 import { faAngleLeft, faAngleRight, faExpand } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { Component, Stage } from "ngl";
+import { Component, Stage, StructureComponent, superpose } from "ngl";
 import { CSSProperties, ChangeEvent, Dispatch, MutableRefObject, useEffect, useRef, useState } from "react"
 import { Button, Form, OverlayTrigger, Spinner, Tooltip } from "react-bootstrap";
 import { ColorHEX, makeColorTransitions, makeTransparencyTransitions } from "../../common/utils";
@@ -115,6 +115,43 @@ function setupComponent(component: Component, name: string, color: ColorHEX, tra
     return component;
 }
 
+function downloadStructures(uniProtIds: string[], stage: MutableRefObject<Stage | null>, colors: ColorHEX[], transparencies: number[], defaultRepresentation: Representation) {
+    const promises = [];
+    
+    for (let i = 0; i < uniProtIds.length; i++) {
+        const promise = stage.current?.loadFile(`https://alphafold.ebi.ac.uk/files/AF-${uniProtIds[i]}-F1-model_v3.pdb`)
+        .then(o => {
+            if (o instanceof Component)
+                return setupComponent(o, uniProtIds[i], colors[i], transparencies[i], defaultRepresentation);
+
+            throw new Error("Invalid object type");
+        });
+
+        if (promise === undefined)
+            continue;
+
+        promises.push(promise);
+    }
+
+    return promises;
+}
+
+function performSuperposition(components: Component[]) {
+    const native = components[0];
+    // There preconditions are necessary to ensure component posesses structure property
+    if (!(native instanceof StructureComponent))
+        return;
+
+    for (let i = 1; i < components.length; i++) {
+        const target = components[i];
+        if (!(target instanceof StructureComponent))
+            continue;
+
+        // last param 'true' - whether to use sequence alignment
+        superpose(native.structure, target.structure, true);
+    }
+}
+
 function setupVisualizer(stage: MutableRefObject<Stage | null>,
                          uniProtIds: string[],
                          setPreviewState: Dispatch<React.SetStateAction<PreviewState>>,
@@ -122,38 +159,22 @@ function setupVisualizer(stage: MutableRefObject<Stage | null>,
     const colors = uniProtIds.length === 2 ? defaultColors : [defaultColors[0], ...makeColorTransitions(uniProtIds.length)];
     const transparencies = uniProtIds.length === 2 ? [1, 1] : [1, ...makeTransparencyTransitions(uniProtIds.length - 1).reverse()];
 
-    const promises = [];
-    for (let i = 0; i < uniProtIds.length; i++) {
-        promises.push(
-            stage.current?.loadFile(`https://alphafold.ebi.ac.uk/files/AF-${uniProtIds[i]}-F1-model_v3.pdb`)
-            .then(o => {
-                if (o instanceof Component)
-                    return setupComponent(o, uniProtIds[i], colors[i], transparencies[i], defaultRepresentation);
-            })
-        );
-    }
+    const promisedComponents = downloadStructures(uniProtIds, stage, colors, transparencies, defaultRepresentation);
 
-    Promise.all(promises)
-    .then(responses => {
-        for (let i = 1; i < responses.length; i++) {
-            // @ts-expect-error - private property
-            (responses[0])?.superpose(responses[i]);
-        }
-        // Unused
-        // When identical 3D models, shift one sliiightly
-        // if ((responses[0])?.name === (responses[1])?.name)
-        //     (responses[0])?.setPosition([0.1,0,0]);
+    Promise.all(promisedComponents)
+    .then(components => {
+        if (components.length > 1)
+            performSuperposition(components);
 
-        (responses[0])?.updateRepresentations({
+        components[0].updateRepresentations({
             position: true,
         });
         // Focus and center on object or the whole scene
-        // responses[0].autoView();
         stage.current?.autoView();
 
-        // setTimeout(() => {
+        setTimeout(() => {
         setPreviewState(PreviewState.Success);
-        // }, 500);
+        }, 500);
     })
     .catch(error => {
         setPreviewState(PreviewState.Error);
@@ -262,7 +283,8 @@ function changeRepresentation(stage: Stage | null, setControls: Dispatch<React.S
         event.preventDefault();
         const newRepre = event.currentTarget.value as Representation;
 
-        // Fix incompatible cases
+        // Fix incompatible case
+        // e.g., surface representation do not support opacity
         if (newRepre === Representation.Surface)
             resetOpacity(stage);
         else
@@ -409,6 +431,10 @@ function makeOpacityRangeElement(onOpacityChange: (event: ChangeEvent<HTMLInputE
     );
 }
 
+/**
+ * Function creates the control panel for the 3D protein visualizer
+ * including buttons and the handlers
+ */
 function makeControls(
     visible: boolean,
     uniProtIds: string[],
@@ -464,7 +490,6 @@ function setupState(stageElementId: string, bgColor: ColorHEX, spin: boolean): [
         backgroundColor: bgColor,
     });
     stage.setSpin(spin);
-    
 
     const handler = () => stage.handleResize();
     window.addEventListener("resize", handler, false);
@@ -539,6 +564,7 @@ export function ProteinVisualizer({
         };
     }, [JSON.stringify(uniProtIds)]);
 
+    // Function to shows loader for 3D canvas and after particular time automatically hides it
     function requestLoader() {
         setPreviewState(PreviewState.Initial);
 

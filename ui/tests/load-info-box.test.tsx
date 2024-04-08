@@ -1,15 +1,15 @@
 import { render } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
-import LoadInfoBox from "../src/components/LoadInfoBox";
 import { QueryObject, QueryObjectContext } from "../src/pages/ProteinSearch/ProteinSearch";
+import SearchMetaBox from "../src/components/SearchMetaBox";
 
 describe('LoadInfoBox', () => {
     it('0', () => {
         const loading = false;
-        const originalInput = "I1VZV6";
+        const originalInput = "P69905";
         const searchTime = 1;
 
-        const { container } = render(<LoadInfoBox loading={loading} originalInput={originalInput} searchTime={searchTime} />);
+        const { container } = render(<SearchMetaBox loading={loading} originalInput={originalInput} searchTime={searchTime} setExperimentalStructuresModalValue={() => {}} />);
 
         const el = container.querySelector('.load-info');
         expect(el).exist;
@@ -20,7 +20,7 @@ describe('LoadInfoBox', () => {
 
     it('1', () => {
         const loading = false;
-        const originalInput = "I1VZV6";
+        const originalInput = "P69905";
         const searchTime = 1;
 
         const queryObject: QueryObject = {
@@ -31,7 +31,7 @@ describe('LoadInfoBox', () => {
 
         const { container } = render(
             <QueryObjectContext.Provider value={queryObject}>
-                <LoadInfoBox loading={loading} originalInput={originalInput} searchTime={searchTime} />
+                <SearchMetaBox loading={loading} originalInput={originalInput} searchTime={searchTime} setExperimentalStructuresModalValue={() => {}} />
             </QueryObjectContext.Provider>
         );
 
@@ -47,7 +47,7 @@ describe('LoadInfoBox', () => {
 
     it('1', () => {
         const loading = true;
-        const originalInput = "I1VZV6";
+        const originalInput = "P69905";
         const searchTime = 1;
 
         const queryObject: QueryObject = {
@@ -58,7 +58,7 @@ describe('LoadInfoBox', () => {
 
         const { container } = render(
             <QueryObjectContext.Provider value={queryObject}>
-                <LoadInfoBox loading={loading} originalInput={originalInput} searchTime={searchTime} />
+                <SearchMetaBox loading={loading} originalInput={originalInput} searchTime={searchTime} setExperimentalStructuresModalValue={() => {}} />
             </QueryObjectContext.Provider>
         );
 

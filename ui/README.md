@@ -3,7 +3,7 @@ AlphaFind ([https://alphafind.fi.muni.cz/](https://alphafind.fi.muni.cz/)) is a 
 
 This repository contains the source code of the AlphaFind's front-end.
 
-![public/alphafind.png](public/alphafind.png){width=40%}
+![public/alphafind.png](public/alphafind.png)
 
 ## Running locally
 

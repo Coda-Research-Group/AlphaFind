@@ -5,20 +5,23 @@ import "./main-footer.scss";
 import { memo } from 'react';
 
 export const MainFooter = memo(() => {
+    let footer_year: string = import.meta.env.VITE_FOOTER_YEAR;
+    footer_year = footer_year.replace("%YEAR%", new Date().getFullYear().toString());
+
     return (
         <>
             <footer className="main">
                 <div className="content">
                     <Container>
                         <div className="header">
-                        Alpha<span className="title-color">Find</span>
+                            Alpha<span className="title-color">Find</span>
                         </div>
                         <div className="links">
                             <a href="https://disa.fi.muni.cz/complex-data-analysis/" target="_blank" title="Website"  rel="noreferrer">
                                 {/* <Image src="imgs/fi-logo.png" fluid className="muni" /> */}
                                 <FontAwesomeIcon icon={faPeopleGroup} />
                             </a>
-                            <a href="mailto:xslanin@mail.muni.cz">
+                            <a href="mailto:slaninakova@mail.muni.cz">
                                 <FontAwesomeIcon icon={faEnvelope} />
                             </a>
                         </div>
@@ -29,7 +32,7 @@ export const MainFooter = memo(() => {
                     </Container>
                 </div>
                 <div className="copyright">
-                    2023 | Created at the <a href="https://disa.fi.muni.cz/complex-data-analysis/">Intelligent Systems for Complex Data Research Group</a> <span className="author"> | Website made by {import.meta.env.VITE_AUTHOR}</span>
+                    {footer_year} | Created at the <a href="https://disa.fi.muni.cz/complex-data-analysis/">Intelligent Systems for Complex Data Research Group</a> <span className="author"> | Website made by {import.meta.env.VITE_AUTHOR}</span>
                 </div>
             </footer>
         </>

@@ -59,6 +59,7 @@ export function LoadMoreButton({ isLoading, loadMoreFn, queue, currentDataLength
 
     const availableCount = MAX_LIMIT - currentDataLength;
 
+    // Do not show button if the user reached upper limit
     if (availableCount <= 0)
         return (<></>);
 

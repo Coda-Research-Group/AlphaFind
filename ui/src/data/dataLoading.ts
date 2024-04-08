@@ -1,7 +1,8 @@
-import { Record } from "../../components/ProteinTable/ProteinTable";
-import { calcOffsetLimit } from "../../common/utils";
+import { Record } from "../components/ProteinTable/ProteinTable";
+import { calcOffsetLimit } from "../common/utils";
 import { callUniProtMapping, canBePdbID } from "./pdbToUniProtMapping";
-import getGeneMapping from "./geneToUniProtMapping";
+import { SearchResult } from "../pages/ProteinSearch/ProteinSearch";
+import { ResponseMapping, getPdbIds, mapGeneToUniProt } from "./uniProtApiWrapper";
 
 
 type ParsedAPIResponse = {
@@ -76,7 +77,8 @@ async function tryMapping(queryValue: string, mutableResult: CallBackendResponse
 
     // if that failed, the input can be a gene symbol
     if (uniProtId === "")
-        uniProtId = await getGeneMapping(queryValue)
+        // uniProtId = await getGeneMapping(queryValue)
+        uniProtId = await mapGeneToUniProt(queryValue);
 
     // if that failed, the input may still be valid UniProt ID but it is not in our database
     if (uniProtId === "") {
@@ -95,30 +97,41 @@ async function tryMapping(queryValue: string, mutableResult: CallBackendResponse
     return uniProtId;
 }
 
-async function rec(queryValue: string, fn: (v: string) => Promise<APIRawResponse>, mutableResult: CallBackendResponse) {
-    const response = await fn(queryValue);
+async function searchAndMap(
+    queryValue: string,
+    fn: (v: string) => Promise<APIRawResponse>,
+    mutable: CallBackendResponse
+) {
+    const response = await fn(queryValue); 
 
-    // No matter what there is waiting queue
+    if (response.search_time !== undefined)
+        mutable.apiResponse.search_time = response.search_time;
+
+    // No matter what, there is waiting queue
     if (response.queue_position !== undefined) {
-        mutableResult.apiResponse.queue_position = response.queue_position;
-        return response;
+        mutable.originalSearchValue = queryValue;
+        mutable.apiResponse.queue_position = response.queue_position;
+
+        return;
     }
 
     // We got results
     if (response.results.length > 0) {
-        mutableResult.originalSearchValue = queryValue;
-        return response;
+        mutable.originalSearchValue = queryValue;
+        mutable.apiResponse.results = response.results;
+
+        return;
     }
 
     // We got no results, try mapping
-    const newQueryValue = await tryMapping(queryValue, mutableResult);
+    const newQueryValue = await tryMapping(queryValue, mutable);
 
     // Mapping was not successful -> there are indeed no results
     if (newQueryValue === "")
-        return response;
+        return;
 
     // Mapping was successful -> try again the same function with new value to handle possible waiting queue
-    return rec(newQueryValue, fn, mutableResult);
+    await searchAndMap(newQueryValue, fn, mutable);
 }
 
 /**
@@ -130,7 +143,7 @@ async function rec(queryValue: string, fn: (v: string) => Promise<APIRawResponse
  * @param limit - The total fetch limit.
  * @returns A promise that resolves to a CallBackendResponse object.
  */
-export async function fetchBackend(queryValue: string, currentRowCount: number, limit: number): Promise<CallBackendResponse> {
+export async function fetchBackend(queryValue: string, limit: number, currentRowCount: number): Promise<CallBackendResponse> {
     const fn = (v: string) => fetchLMI(v, currentRowCount, limit);
 
     const result: CallBackendResponse = {
@@ -142,10 +155,7 @@ export async function fetchBackend(queryValue: string, currentRowCount: number, 
         isInAlphaFoldDB: false,
     };
 
-    const response = await rec(queryValue, fn, result);
-    result.apiResponse.results = response.results;
-    if (response.search_time !== undefined)
-        result.apiResponse.search_time = response.search_time;
+    await searchAndMap(queryValue, fn, result);
 
     return result;
 }
@@ -158,8 +168,25 @@ export async function fetchBackend(queryValue: string, currentRowCount: number, 
 async function fetchSingleMetadata(object: APIRawResponseRecord): Promise<Record> {
     const res = await fetch(`https://www.alphafold.ebi.ac.uk/api/prediction/${object.object_id}?key=AIzaSyCeurAJz7ZGjPQUtEaerUkBZ3TaBkXrY94`);
     
-    if (!res.ok)
-        throw new Error(`${res.status} ${res.statusText}`);
+    if (!res.ok) {
+        console.error(`${res.status} ${res.statusText}`);
+
+        return {
+            rmsd: object.rmsd,
+            tmScore: object.tm_score,
+            alignedLength: object.aligned_percentage,
+            identicalAAs: object.sequence_aligned_percentage,
+            experimentalStructuresExists: false,
+            uniProtId: object.object_id,
+            name: null,
+            organism: null,
+            isReviewed: false,
+            taxId: 0,
+            sequence: "",
+            gene: "",
+            experimentalStructures: null,
+        };
+    }
 
     const json = await res.json();
 
@@ -172,6 +199,11 @@ async function fetchSingleMetadata(object: APIRawResponseRecord): Promise<Record
         organism: json['0']['organismScientificName'],
         uniProtId: object.object_id,
         name: json['0']['uniprotDescription'],
+        isReviewed: json['0']['isReviewed'],
+        taxId: json['0']['taxId'],
+        sequence: json['0']['uniprotSequence'],
+        gene: json['0']['gene'],
+        experimentalStructures: null,
     };
 
     return record;
@@ -206,21 +238,25 @@ export async function fetchQueryObjectMetadata(objectId: string) {
     return fetchSingleMetadata(data);
 }
 
-export async function fetchData(queryValue: string, currentData: Record[], limit: number): Promise<ParsedAPIResponse> {
+export async function fetchData(
+    searchParams: [string, number],
+    currentData: Record[],
+    mappedUnitProtId: string | null
+): Promise<ParsedAPIResponse> { 
+    // To prevent calling mapping again
+    let searchValue = searchParams[0];
+    if (mappedUnitProtId !== null)
+        searchValue = mappedUnitProtId;
+    
+    const backendResponse = await fetchBackend(searchValue, searchParams[1], currentData?.length);
+
     const response: ParsedAPIResponse = {
         data: [],
-        searchTime: 0,
-        originalSearchValue: queryValue,
-        isValueValidUniProtID: false,
-        isInAlphaFoldDB: false,
+        searchTime: backendResponse.apiResponse.search_time ?? 0,
+        originalSearchValue: backendResponse.originalSearchValue,
+        isValueValidUniProtID: backendResponse.isValueValidUniProtID,
+        isInAlphaFoldDB: backendResponse.isInAlphaFoldDB,
     };
-
-    const backendResponse = await fetchBackend(queryValue, currentData?.length, limit);
-
-    response.originalSearchValue = backendResponse.originalSearchValue;
-    response.isInAlphaFoldDB = backendResponse.isInAlphaFoldDB;
-    response.isValueValidUniProtID = backendResponse.isValueValidUniProtID;
-    response.searchTime = backendResponse.apiResponse.search_time ?? 0;
 
     if (backendResponse.apiResponse.queue_position !== undefined)
         response.queuePosition = backendResponse.apiResponse.queue_position;
@@ -234,4 +270,70 @@ export async function fetchData(queryValue: string, currentData: Record[], limit
     response.data = currentData === undefined ? metadataResponse : currentData.concat(metadataResponse);
 
     return response;
+}
+
+export async function fetchExperimentalStructures(
+    data: Record[], 
+    setSearchResults: React.Dispatch<React.SetStateAction<SearchResult>>,
+    searchParams: React.MutableRefObject<[string, number]>
+) {
+    const spCopy = [searchParams.current[0], searchParams.current[1]];
+    const BATCH_SIZE = 5;
+
+    const dataCopy = [...data];
+
+    /**
+     * Performs the fetch in batches to prevent crashing the browser from too many requests
+     * 
+     * Works this way:
+     * Loops current results
+     * If the current result has no experimental structures, add it to the batch
+     * If the batch is full, make the fetch and update the results
+     * 
+     * Handles also the case if "load more" actions was performed
+     */
+    let i = 0;
+    let batch: [number, Promise<ResponseMapping>][] = [];
+    while (i < dataCopy.length) {
+        // Prevent race conditions
+        // e.g., case if exp. structures are still loading but user requests to load more
+        // or performs new search
+        
+        if (spCopy[0] !== searchParams.current[0] || spCopy[1] !== searchParams.current[1])
+            break;
+
+        // Adds to batch if there are no experimental structures
+        if (dataCopy[i].experimentalStructures === null)
+            batch.push([i, getPdbIds(dataCopy[i].uniProtId)]);
+
+        if (batch.length === BATCH_SIZE) {
+            // Prepare the requests
+            const promises = batch.map(item => item[1]);
+            // Run the requests
+            const results = await Promise.all(promises);
+
+            results.forEach((result, index) => {
+                const pdbIds = result.results.map(item => item.to);
+                dataCopy[batch[index][0]].experimentalStructures = pdbIds;
+            });
+
+            // Prevent race conditions
+            // e.g., case if exp. structures are still loading but user requests to load more
+            // or performs new search
+            if (spCopy[0] !== searchParams.current[0] || spCopy[1] !== searchParams.current[1])
+                break;
+
+            // Update the table
+            setSearchResults(prev => ({
+                meta: prev.meta,
+                data: dataCopy,
+            }));
+            
+
+            batch = [];
+            await new Promise(resolve => setTimeout(resolve, 3000));
+        }
+
+        i++;
+    }
 }

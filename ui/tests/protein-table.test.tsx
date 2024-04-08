@@ -15,6 +15,11 @@ const data: Record[] = [{
     identicalAAs: 4,
     organism: "Organism 1",
     name: "Name A",
+    isReviewed: true,
+    gene: "Gene A",
+    sequence: "ASJDHAJKLSHDKJLASHD",
+    taxId: 1,
+    experimentalStructures: [],
 }, {
     uniProtId: "B",
     experimentalStructuresExists: true,
@@ -24,6 +29,11 @@ const data: Record[] = [{
     identicalAAs: 4,
     organism: "Organism 2",
     name: "Name B",
+    isReviewed: false,
+    gene: "Gene A",
+    sequence: "ASJDHAJKLSHDKJLASHD",
+    taxId: 1,
+    experimentalStructures: [],
 }, {
     uniProtId: "C",
     experimentalStructuresExists: true,
@@ -33,6 +43,11 @@ const data: Record[] = [{
     identicalAAs: 4,
     organism: "Organism 2",
     name: "Name C",
+    isReviewed: false,
+    gene: "Gene A",
+    sequence: "ASJDHAJKLSHDKJLASHD",
+    taxId: 1,
+    experimentalStructures: [],
 }, {
     uniProtId: "D",
     experimentalStructuresExists: true,
@@ -42,6 +57,11 @@ const data: Record[] = [{
     identicalAAs: 4,
     organism: "Organism 3",
     name: "Name D",
+    isReviewed: false,
+    gene: "Gene A",
+    sequence: "ASJDHAJKLSHDKJLASHD",
+    taxId: 1,
+    experimentalStructures: [],
 }, {
     uniProtId: "E",
     experimentalStructuresExists: true,
@@ -51,6 +71,11 @@ const data: Record[] = [{
     identicalAAs: 4,
     organism: "Organism 3",
     name: "Name E",
+    isReviewed: false,
+    gene: "Gene A",
+    sequence: "ASJDHAJKLSHDKJLASHD",
+    taxId: 1,
+    experimentalStructures: [],
 }, {
     uniProtId: "F",
     experimentalStructuresExists: true,
@@ -60,6 +85,11 @@ const data: Record[] = [{
     identicalAAs: 4,
     organism: "Organism 2",
     name: "Name F",
+    isReviewed: false,
+    gene: "Gene A",
+    sequence: "ASJDHAJKLSHDKJLASHD",
+    taxId: 1,
+    experimentalStructures: [],
 }];
 
 describe("ProteinTable", () => {
@@ -73,7 +103,7 @@ describe("ProteinTable", () => {
         act(() => {
             render(
                 <QueryObjectContext.Provider value={queryObject}>
-                    <ProteinTable data={data} />
+                    <ProteinTable data={data} setExperimentalStructuresModalValue={() => {}} />
                 </QueryObjectContext.Provider>
             );
         });
@@ -136,7 +166,7 @@ describe("ProteinTable", () => {
         act(() => {
             render(
                 <QueryObjectContext.Provider value={queryObject}>
-                    <ProteinTable data={data} />
+                    <ProteinTable data={data} setExperimentalStructuresModalValue={() => {}} />
                 </QueryObjectContext.Provider>
             );
         });
@@ -177,7 +207,7 @@ describe("ProteinTable", () => {
         act(() => {
             render(
                 <QueryObjectContext.Provider value={queryObject}>
-                    <ProteinTable data={data} />
+                    <ProteinTable data={data} setExperimentalStructuresModalValue={() => {}} />
                 </QueryObjectContext.Provider>
             );
         });
@@ -218,7 +248,7 @@ describe("ProteinTable", () => {
         act(() => {
             render(
                 <QueryObjectContext.Provider value={queryObject}>
-                    <ProteinTable data={data} />
+                    <ProteinTable data={data} setExperimentalStructuresModalValue={() => {}} />
                 </QueryObjectContext.Provider>
             );
         });

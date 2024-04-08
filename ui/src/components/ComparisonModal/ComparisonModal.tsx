@@ -6,13 +6,12 @@ import { QueryObjectContext } from "../../pages/ProteinSearch/ProteinSearch";
 import "./comparison-modal.scss";
 import ProteinVisualizer from "../ProteinVisualizer";
 
+
 const controlHintPopover = (
     <Popover id="popover-basic" style={{
-        // fontSize: 1.1 + 'rem',
         width: 'auto',
         maxWidth: 450 + 'px',
     }}>
-        {/* <Popover.Header as="h3">Controls</Popover.Header> */}
         <Popover.Body>
             <Table borderless striped>
                 <tbody>
@@ -100,6 +99,7 @@ export function ComparisonModal({ show, onHide, comparingUniProtId }: Props) {
             <Modal.Body className="p-0 pb-2">
                 <div className="comparison-3d">
                     <ProteinVisualizer uniProtIds={uniProtIds} stageElementId='protein-overlapping' allowControlPanel={true} />
+                    {/* <MolStarWrapper uniProtIds={uniProtIds} /> */}
                 </div>
             </Modal.Body>
         </Modal>

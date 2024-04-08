@@ -1,9 +1,8 @@
 import { Button, Col, Row, Table } from "react-bootstrap";
-import { getCoreRowModel, getFilteredRowModel, getSortedRowModel, useReactTable, getGroupedRowModel, getExpandedRowModel, ColumnFiltersState, SortingState, CellContext } from "@tanstack/react-table";
-import { FormEvent, useState, useContext } from "react";
+import { getCoreRowModel, getFilteredRowModel, getSortedRowModel, useReactTable, getGroupedRowModel, getExpandedRowModel, ColumnFiltersState, SortingState } from "@tanstack/react-table";
+import { useState, useContext, createContext } from "react";
 import { columns } from "../../pages/ProteinSearch/tableColumnsDefinition";
 import ComparisonModal from "../ComparisonModal";
-import { onSearchHeader } from "../../pages/ProteinSearch/ProteinSearch";
 import "./protein-table.scss";
 import FilterInfo from "../FilterInfo";
 import { ProteinTableRow } from "./ProteinTableRow";
@@ -18,25 +17,36 @@ export type Record = {
     rmsd: number;
     alignedLength: number;
     identicalAAs: number;
-    organism: string;
-    name: string;
+    organism: string | null;
+    name: string | null;
+    isReviewed: boolean;
+    taxId: number;
+    sequence: string;
+    gene: string;
+    experimentalStructures: string[] | null;
 };
 
-export interface CustomCellContext extends CellContext<Record, unknown> {
-    meta: {
-        isExpanded: boolean;
-        subRowsCount: number;
-        referenceUniProtId: string | null;
-        onSearch: onSearchHeader;
-        onClickModal: (event: FormEvent) => void;
-    };
-}
+export type ExperimentalStructuresModalAttributes = {
+    entryUniProtId: string;
+    experimentalStructures: string[];
+} | null;
+
+export type ModalContextType = {
+    setExperimentalStructuresModalValue: (attrs: ExperimentalStructuresModalAttributes) => void;
+    setComparisonModalValue: (uniProtId: string) => void;
+};
+
+export const ModalContext = createContext<ModalContextType>({
+    setComparisonModalValue: () => {},
+    setExperimentalStructuresModalValue: () => {},
+});
 
 type Props = {
     data: Record[];
+    setExperimentalStructuresModalValue: React.Dispatch<React.SetStateAction<ExperimentalStructuresModalAttributes>>;
 };
 
-export function ProteinTable({ data }: Props) {
+export function ProteinTable({ data, setExperimentalStructuresModalValue }: Props) {
     const [proteinComparisonModalValue, setProteinComparisonModalValue] = useState<string | null>(null);
     // React Table states
     const [sorting, setSorting] = useState<SortingState>([{
@@ -70,7 +80,6 @@ export function ProteinTable({ data }: Props) {
 
     return (
         <>
-        {/* <div className={visible ? undefined : 'visually-hidden'}> */}
             <ComparisonModal
                 show={proteinComparisonModalValue !== null}
                 onHide={() => setProteinComparisonModalValue(null)}
@@ -84,13 +93,17 @@ export function ProteinTable({ data }: Props) {
             <Table responsive hover borderless className="protein-table">
                 <ProteinTableHead table={table} />
                 <tbody>
-                    {table.getRowModel().rows.map(row => 
-                        <ProteinTableRow
-                            key={row.id}
-                            row={row}
-                            setProteinComparisonModalValue={setProteinComparisonModalValue}
-                        />
-                    )}
+                    <ModalContext.Provider value={{
+                        setComparisonModalValue: setProteinComparisonModalValue,
+                        setExperimentalStructuresModalValue: setExperimentalStructuresModalValue,
+                    }}>
+                        {table.getRowModel().rows.map(row => 
+                            <ProteinTableRow
+                                key={row.id}
+                                row={row}
+                            />
+                        )}
+                    </ModalContext.Provider>
                 </tbody>
             </Table>
             <Row className="table-post">
@@ -109,7 +122,6 @@ export function ProteinTable({ data }: Props) {
                     >Export all to CSV</Button>
                 </Col>
             </Row>
-        {/* </div> */}
         </>
     );
 }

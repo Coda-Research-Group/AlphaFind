@@ -1,0 +1,21 @@
+.experimental-structures-modal {
+    .modal-title {
+        font-size: 1.2rem;
+    }
+
+    ul {
+        list-style: none;
+        // font-size: 1.1rem;
+        max-height: 450px;
+        overflow-y: scroll;
+
+        li {
+            margin-bottom: 0.75rem;
+            // border-bottom: 1px solid #ccc;
+        }
+    }
+
+    sup {
+        font-size: 0.7rem;
+    }
+}
