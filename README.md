@@ -22,7 +22,7 @@ The codebase is divided into three folders:
  
 See the `README.md` files in each folder for more details.
 
-## Running locally
+## Installation
 
 Prerequisites:
 - [Docker](https://docs.docker.com/get-docker/)
@@ -33,6 +33,32 @@ Prerequisites:
 
 The `training/data/cifs` folder contains a small subset of the AlphaFold DB comprising 109 proteins.
 The full AlphaFold DB can be downloaded from [here](https://alphafold.ebi.ac.uk/download).
+
+## Cite Us
+If you use AlphaFind in your research, please cite the following publication:
+
+```
+@article{prochazka2024alphafind,
+  title={AlphaFind: discover structure similarity across the proteome in AlphaFold DB},
+  author={Proch{\'a}zka, David and Slanin{\'a}kov{\'a}, Ter{\'e}zia and Olha, Jaroslav and Ro{\v{s}}inec, Adri{\'a}n and Gre{\v{s}}ov{\'a}, Katar{\'\i}na and J{\'a}no{\v{s}}ov{\'a}, Miriama and {\v{C}}ill{\'\i}k, Jakub and Porubsk{\'a}, Jana and Svobodov{\'a}, Radka and Dohnal, Vlastislav and others},
+  journal={Nucleic Acids Research},
+  pages={gkae397},
+  year={2024},
+  publisher={Oxford University Press}
+}
+```
+
+## Additional Information
+- **Publisher**: Intelligent Systems for Complex Data Research Group
+- **Object Identifier**: [doi/10.5281/zenodo.11085862](https://zenodo.org/doi/10.5281/zenodo.11085862)
+- **Keywords**: similarity search, protein structure, AlphaFold, protein database, web application 
+- **Creators and Active Contributors**: [Terézia Slanináková](https://github.com/TerkaSlan), [David Procházka](https://github.com/ProchazkaDavid)
+- **Inactive Contributors**: [Terézia Slanináková](https://github.com/TerkaSlan), [David Procházka](https://github.com/ProchazkaDavid)
+- **Object Type**: Software
+- **Title**: AlphaFind: discover structure similarity across the proteome in AlphaFold DB
+- **Publication Date**: 2024-05-15
+- **Publication**: [doi.org/10.1093/nar/gkae397](https://doi.org/10.1093/nar/gkae397)
+
 
 ## License
 

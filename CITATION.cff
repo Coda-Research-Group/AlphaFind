@@ -1,0 +1,71 @@
+# This CITATION.cff file was generated with cffinit.
+# Visit https://bit.ly/cffinit to generate yours today!
+
+cff-version: 1.2.0
+title: AlphaFind
+message: >-
+  If you use this software, please cite it using the
+  metadata from this file.
+type: software
+authors:
+  - given-names: Terézia
+    family-names: Slanináková
+    email: slaninakova@ics.muni.cz
+    affiliation: >-
+      Institute of Computer Science, Masaryk University,
+      Brno, 602 00, Czech Republic
+    orcid: 'https://orcid.org/0000-0003-0502-1145'
+    credit: 0.4
+  - given-names: David
+    family-names: Procházka
+    email: davidprochazka@mail.muni.cz
+    orcid: 'https://orcid.org/0009-0000-2765-8329'
+    affiliation: >-
+      Faculty of Informatics, Masaryk University, Brno, 602
+      00, Czech Republic
+    credit: 0.4
+  - given-names: Jakub
+    family-names: Čillík
+    email: 524749@mail.muni.cz
+    affiliation: >-
+      Institute of Computer Science, Masaryk University,
+      Brno, 602 00, Czech Republic
+    orcid: 'https://orcid.org/0009-0001-7780-3317'
+    credit: 0.2
+identifiers:
+  - type: doi
+    value: 10.5281/zenodo.11085862
+  - type: url
+    value: 'https://alphafind.fi.muni.cz/'
+  - type: url
+    value: 'https://github.com/Coda-Research-Group/AlphaFind/'
+repository-code: 'https://github.com/Coda-Research-Group/AlphaFind/'
+url: 'https://alphafind.fi.muni.cz/'
+repository-artifact: >-
+  https://data.narodni-repozitar.cz/general/datasets/egsm2-7a369
+abstract: >-
+  AlphaFind is a web-based search engine that allows for
+  structure-based search of the entire AlphaFold Protein
+  Structure Database. Uniprot ID, PDB ID, or Gene Symbol is
+  accepted as input – the engine will return the most
+  similar proteins found within AlphaFold DB, with an option
+  for additional search to extend and refine the results.
+  The search results are grouped by their source organism
+  and displayed along with several similarity metrics. 3D
+  visualizations of the structural superposition of the
+  proteins are provided, and text filters can be used to
+  find specific organisms or Uniprot IDs. For details about
+  the methodology and usage, please see the manual. This
+  website is free and open to all users and there is no
+  login requirement.
+keywords:
+  - similarity search
+  - protein similarity
+  - AlphaFold
+  - proteins
+  - web application
+  - AFDB
+license: MIT
+commit: 976511d1ad489b222346bc81e1d89ad49d388924
+version: 1.0.0
+date-released: '2024-04-29'
