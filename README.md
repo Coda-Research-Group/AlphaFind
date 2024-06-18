@@ -28,8 +28,9 @@ Prerequisites:
 - [Docker](https://docs.docker.com/get-docker/)
 
 1. Clone this repository
-2. Run `./run.sh` in your terminal
-3. Open `http://localhost:8081` in your browser
+2. Add execute permissions to the `run.sh` script: `chmod +x run.sh`
+3. Run `./run.sh` in your terminal
+4. Open `http://localhost:8081` in your browser
 
 The `training/data/cifs` folder contains a small subset of the AlphaFold DB comprising 109 proteins.
 The full AlphaFold DB can be downloaded from [here](https://alphafold.ebi.ac.uk/download).

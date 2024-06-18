@@ -1,0 +1,35 @@
+name: CI
+
+on:
+  push:
+    # Sequence of patterns matched against refs/heads
+    branches:    
+      # Push events on main and dev branch
+      - main
+      - fair-impact-hw1
+    # Sequence of patterns matched against refs/tags
+    tags: '*'
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
+    - name: Make run.sh executable
+      run: chmod +x ./run.sh
+
+    - name: Execute run.sh
+      run: ./run.sh
+
+    - name: Wait for UI to start
+      run: sleep 60  # Adjust the duration as needed for the UI to start
+
+    - name: Assert UI is running
+      run: |
+        curl -f http://localhost:8081 || (echo "UI is not running" && exit 1)
