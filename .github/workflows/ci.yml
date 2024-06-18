@@ -27,19 +27,14 @@ jobs:
     - name: Docker build training, backend, and frontend
       run: ./run.sh
 
-    - name: Wait for UI to start
-      run: sleep 10
-
     # Required to see if the app is running
     - name: Set up Node.js
       uses: actions/setup-node@v3
       with:
         node-version: '14'
 
-    - name: Assert UI is running
-      run: |
-        curl -f http://localhost:8081 || (echo "The app is not running" && exit 1)
+    - name: Install Puppeteer
+      run: npm install puppeteer
 
-    - name: Assert API is responding
-      run: |
-        curl -f https://localhost:8080/search?query=P69905&offset=0&limit=50 || (echo "The API is not running" && exit 1)
+    - name: Run Puppeteer script
+      run: node puppeteer.js
