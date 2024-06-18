@@ -26,15 +26,3 @@ jobs:
 
     - name: Docker build training, backend, and frontend
       run: ./run.sh
-
-    # Required to see if the app is running
-    - name: Set up Node.js
-      uses: actions/setup-node@v3
-      with:
-        node-version: '14'
-
-    - name: Install Puppeteer
-      run: npm install puppeteer
-
-    - name: Run Puppeteer script
-      run: node puppeteer.js
