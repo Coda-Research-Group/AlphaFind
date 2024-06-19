@@ -1,0 +1,5 @@
+This project includes code from the following sources:
+
+- data from [AlphaFold] licensed under the Apache 2.0 License in `training/data/cifs`
+
+A copy of the Apache 2.0 License can be found in the LICENSE-APACHE file.
