@@ -24,7 +24,7 @@ See the `README.md` files in each folder for more details.
 
 ## Installation
 
-Prerequisites:
+Prerequisites / Dependencies:
 - [Docker](https://docs.docker.com/get-docker/)
 
 1. Clone this repository
@@ -34,6 +34,8 @@ Prerequisites:
 
 The `training/data/cifs` folder contains a small subset of the AlphaFold DB comprising 109 proteins.
 The full AlphaFold DB can be downloaded from [here](https://alphafold.ebi.ac.uk/download).
+
+**Tested on**: Ubuntu 22.04 LTS
 
 ## Cite Us
 If you use AlphaFind in your research, please cite the following publication:
@@ -54,7 +56,7 @@ If you use AlphaFind in your research, please cite the following publication:
 - **Object Identifier**: [doi/10.5281/zenodo.11085862](https://zenodo.org/doi/10.5281/zenodo.11085862)
 - **Keywords**: similarity search, protein structure, AlphaFold, protein database, web application 
 - **Creators and Active Contributors**: [Terézia Slanináková](https://github.com/TerkaSlan), [David Procházka](https://github.com/ProchazkaDavid)
-- **Inactive Contributors**: [Terézia Slanináková](https://github.com/TerkaSlan), [David Procházka](https://github.com/ProchazkaDavid)
+- **Inactive Contributors**: [Jakub Čillík](https://github.com/xcillik),
 - **Object Type**: Software
 - **Title**: AlphaFind: discover structure similarity across the proteome in AlphaFold DB
 - **Publication Date**: 2024-05-15
