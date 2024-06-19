@@ -1,1 +1,150 @@
-{"@context":{"bs":"https://bioschemas.org/terms/","codemeta":"https://w3id.org/codemeta/","maSMP":"https://discovery.biothings.io/view/maSMP/","rdf":"https://www.w3.org/1999/02/22-rdf-syntax-ns#","rdfs":"https://www.w3.org/2000/01/rdf-schema#","schema":"https://schema.org/"},"@id":"https://openebench.bsc.es/bioschemas/tools/observatory:AlphaFind:v1.0.0/web","@type":"schema:SoftwareApplication","bioschemas:input":[{"@type":"https://bioschemas.org/FormatParameter","bioschemas:encodingFormat":" "},{"@type":"https://bioschemas.org/FormatParameter","bioschemas:encodingFormat":" "}],"codemeta:readme":"https://github.com/Coda-Research-Group/AlphaFind/blob/main/README.md","schema:additionalType":"web","schema:applicationCategory":"web","schema:applicationSubcategory":["https://github.com/topics/alphafold","https://github.com/topics/lmi","https://github.com/topics/proteins","https://github.com/topics/structural-similarity","https://github.com/topics/alphafind"],"schema:author":[{"@type":"schema:Person","schema:email":"david@prochazka.dev","schema:name":"David Procházka"}],"schema:codeRepository":["https://github.com/Coda-Research-Group/AlphaFind"],"schema:dateModified":"2024-06-11T15:01:33Z","schema:description":"AlphaFind: Discover structure similarity across the entire known proteome","schema:license":[{"@type":"schema:CreativeWork","schema:name":"MIT License","schema:url":"http://choosealicense.com/licenses/mit/"}],"schema:name":"AlphaFind","schema:softwareHelp":[{"@id":"https://github.com/Coda-Research-Group/AlphaFind/wiki/Manual"},{"@id":"https://github.com/Coda-Research-Group/AlphaFind/blob/main/README.md"},{"@id":"https://github.com/Coda-Research-Group/AlphaFind/blob/main/README.md#running-locally"},{"@id":"https://github.com/Coda-Research-Group/AlphaFind/blob/main/README.md#running-locally"}],"schema:softwareVersion":"v1.0.0"}
+{
+    "@context": "https://w3id.org/codemeta/3.0",
+    "type": "SoftwareSourceCode",
+    "applicationCategory": "Biology",
+    "author": [
+        {
+            "id": "http://orcid.org/0000-0003-0502-1145",
+            "type": "Person",
+            "affiliation": {
+                "type": "Organization",
+                "name": "Institute of Computer Science, Masaryk University, Brno, 602 00, Czech Republic"
+            },
+            "email": "slaninakova@ics.muni.cz",
+            "familyName": "Slanináková",
+            "givenName": "Terézia"
+        },
+        {
+            "type": "Role",
+            "schema:author": "http://orcid.org/0000-0003-0502-1145",
+            "roleName": "Developer"
+        },
+        {
+            "type": "Role",
+            "schema:author": "http://orcid.org/0000-0003-0502-1145",
+            "roleName": "Maintainer"
+        },
+        {
+            "id": "http://orcid.org/0009-0000-2765-8329",
+            "type": "Person",
+            "affiliation": {
+                "type": "Organization",
+                "name": "Faculty of Informatics, Masaryk University, Brno, 602 00, Czech Republic"
+            },
+            "email": "davidprochazka@mail.muni.cz",
+            "familyName": "Procházka",
+            "givenName": "David"
+        },
+        {
+            "type": "Role",
+            "schema:author": "http://orcid.org/0009-0000-2765-8329",
+            "roleName": "Maintainer"
+        },
+        {
+            "type": "Role",
+            "schema:author": "http://orcid.org/0009-0000-2765-8329",
+            "roleName": "Developer"
+        },
+        {
+            "id": "http://orcid.org/0009-0001-7780-3317",
+            "type": "Person",
+            "affiliation": {
+                "type": "Organization",
+                "name": "Institute of Computer Science, Masaryk University, Brno, 602 00, Czech Republic"
+            },
+            "email": "524749@muni.cz",
+            "familyName": "Čillík",
+            "givenName": "Jakub"
+        },
+        {
+            "type": "Role",
+            "schema:author": "http://orcid.org/0009-0001-7780-3317",
+            "roleName": "Developer"
+        }
+    ],
+    "contributor": [
+        {
+            "id": "http://orcid.org/0000-0003-0502-1145",
+            "type": "Person",
+            "affiliation": {
+                "type": "Organization",
+                "name": "Institute of Computer Science, Masaryk University, Brno, 602 00, Czech Republic"
+            },
+            "email": "slaninakova@ics.muni.cz",
+            "familyName": "Slanináková",
+            "givenName": "Terézia"
+        },
+        {
+            "type": "Role",
+            "schema:author": "http://orcid.org/0000-0003-0502-1145",
+            "roleName": "Maintainer"
+        },
+        {
+            "type": "Role",
+            "schema:author": "http://orcid.org/0000-0003-0502-1145",
+            "roleName": "Developer"
+        },
+        {
+            "id": "http://orcid.org/0009-0000-2765-8329",
+            "type": "Person",
+            "affiliation": {
+                "type": "Organization",
+                "name": "Faculty of Informatics, Masaryk University, Brno, 602 00, Czech Republic"
+            },
+            "email": "davidprochazka@mail.muni.cz",
+            "familyName": "Procházka",
+            "givenName": "David"
+        },
+        {
+            "type": "Role",
+            "schema:author": "http://orcid.org/0009-0000-2765-8329",
+            "roleName": "Maintainer"
+        },
+        {
+            "type": "Role",
+            "schema:author": "http://orcid.org/0009-0000-2765-8329",
+            "roleName": "Developer"
+        }
+    ],
+    "codeRepository": "https://github.com/Coda-Research-Group/AlphaFind.git",
+    "dateCreated": "2024-02-18",
+    "dateModified": "2024-02-18",
+    "datePublished": "2024-02-18",
+    "description": "AlphaFind is a web-based search engine that allows for structure-based search of the entire AlphaFold Protein Structure Database. Uniprot ID, PDB ID, or Gene Symbol is accepted as input – the engine will return the most similar proteins found within AlphaFold DB, with an option for additional search to extend and refine the results. The search results are grouped by their source organism and displayed along with several similarity metrics. 3D visualizations of the structural superposition of the proteins are provided, and text filters can be used to find specific organisms or Uniprot IDs. For details about the methodology and usage, please see the manual. This website is free and open to all users and there is no login requirement.",
+    "downloadUrl": "https://github.com/Coda-Research-Group/AlphaFind/archive/refs/heads/main.zip",
+    "funder": {
+        "type": "Organization",
+        "name": "Czech Science Foundation"
+    },
+    "identifier": "https://zenodo.org/doi/10.5281/zenodo.11085862",
+    "isPartOf": "https://alphafind.fi.muni.cz/",
+    "keywords": [
+        "similarity search",
+        "structural similarity",
+        "proteins",
+        "AlphaFold",
+        "AFDB"
+    ],
+    "license": "https://spdx.org/licenses/MIT",
+    "name": "AlphaFind",
+    "operatingSystem": [
+        "Linux",
+        "Windows",
+        "MacOS"
+    ],
+    "programmingLanguage": [
+        "Python3",
+        "TypeScript",
+        "JavaScipt",
+        "Shell",
+        "HTML"
+    ],
+    "releaseNotes": "Initial Release",
+    "softwareRequirements": "Docker",
+    "version": "1.0.0",
+    "developmentStatus": "active",
+    "funding": "GF23-07040K",
+    "isSourceCodeOf": "https://alphafind.fi.muni.cz/",
+    "issueTracker": "https://github.com/Coda-Research-Group/AlphaFind/issues",
+    "referencePublication": "https://doi.org/10.1093/nar/gkae397"
+}

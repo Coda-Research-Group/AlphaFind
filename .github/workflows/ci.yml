@@ -1,0 +1,28 @@
+name: CI
+
+on:
+  push:
+    # Sequence of patterns matched against refs/heads
+    branches:    
+      # Push events on main and dev branch
+      - main
+      - fair-impact-hw1
+    # Sequence of patterns matched against refs/tags
+    tags: '*'
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
+    - name: Make run.sh executable
+      run: chmod +x ./run.sh
+
+    - name: Docker build training, backend, and frontend
+      run: ./run.sh
