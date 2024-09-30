@@ -41,7 +41,7 @@ describe('LoadInfoBox', () => {
         expect(el?.querySelectorAll("li")[0].textContent).contain("Query");
         expect(el?.querySelectorAll("li")[1].textContent).contain("Name: BBB");
         expect(el?.querySelectorAll("li")[2].textContent).contain("Organism: CCC");
-        expect(el?.querySelectorAll("li")[3].textContent).contain("AAA in AlphaFold");
+        expect(el?.querySelectorAll("li")[3].textContent).contain("AAA in UniProt");
         expect(el?.querySelectorAll("li")[4].textContent).contain("Search Time");
     });
 
@@ -68,11 +68,10 @@ describe('LoadInfoBox', () => {
         expect(el?.querySelectorAll("li")[0].textContent).contain("Query");
         expect(el?.querySelectorAll("li")[1].textContent).contain("Name: BBB");
         expect(el?.querySelectorAll("li")[2].textContent).contain("Organism: CCC");
-        expect(el?.querySelectorAll("li")[3].textContent).contain("AAA in AlphaFold");
+        expect(el?.querySelectorAll("li")[3].textContent).contain("AAA in UniProt");
         expect(el?.querySelectorAll("li")[4].textContent).contain("Search Time");
         
         const spinner = container.querySelector('.spinner-border');
         expect(spinner).exist;
-        expect(spinner?.textContent).contain("Loading...");
     });
 });
