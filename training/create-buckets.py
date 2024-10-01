@@ -46,16 +46,17 @@ def parse_model_params(model_path):
         model = 'MLP'
         dimensionality = DEFAULT_DIMENSIONALITY
         n_classes = 2
+        LOG.info(f'Parsed out model={model}, dimensionality={dimensionality}, n_classes={n_classes}')
+        return model, dimensionality, n_classes
+
+    match = re.search(pattern, model_path, re.MULTILINE)
+    if match and len(match.groups()) == 3:
+        model, n_classes, dimensionality = match.groups()
+        dimensionality = int(dimensionality) if dimensionality is not None else DEFAULT_DIMENSIONALITY
+        n_classes = int(n_classes)
     else:
-        match = re.search(pattern, model_path, re.MULTILINE)
-        if match and len(match.groups()) == 3:
-            model = match.group(1)
-            n_classes = int(match.group(2))
-            dimensionality = match.group(3)
-            dimensionality = int(dimensionality) if dimensionality is not None else DEFAULT_DIMENSIONALITY
-        else:
-            LOG.info(f'Failed to parse out model params from model path: {model_path}')
-            exit(1)
+        LOG.info(f'Failed to parse out model params from model path: {model_path}')
+        exit(1)
 
     LOG.info(f'Parsed out model={model}, dimensionality={dimensionality}, n_classes={n_classes}')
     return model, dimensionality, n_classes
