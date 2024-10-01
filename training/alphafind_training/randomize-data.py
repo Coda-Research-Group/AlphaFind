@@ -5,8 +5,13 @@ import math
 from typing import Dict, List
 
 import pandas as pd
-
-from utils import create_dir, load_dataset, save_json, save_pickle, write_row_to_csv
+from alphafind_training.utils import (
+    create_dir,
+    load_dataset,
+    save_json,
+    save_pickle,
+    write_row_to_csv,
+)
 
 
 def construct_metadata_dict(

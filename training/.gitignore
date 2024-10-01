@@ -13,3 +13,4 @@ data/kmeans.idx
 models/
 .coverage
 coverage.xml
+*.egg-info

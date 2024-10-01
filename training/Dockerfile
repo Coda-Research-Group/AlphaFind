@@ -17,5 +17,7 @@ RUN pip install -r /var/requirements.txt && rm -rf ~/.cache
 
 COPY . /training
 WORKDIR /training
+RUN pip install -e .
 RUN chmod +x /training/run.sh
+
 CMD [ "/bin/bash", "/training/run.sh" ]

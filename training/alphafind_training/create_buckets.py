@@ -7,9 +7,8 @@ from os import listdir
 import numpy as np
 import pandas as pd
 import torch
-from model import LIDatasetPredict, load_model
-from tqdm import tqdm
-from utils import (
+from alphafind_training.model import LIDatasetPredict, load_model
+from alphafind_training.utils import (
     create_dir,
     dir_exists,
     file_exists,
@@ -19,6 +18,7 @@ from utils import (
     save_pickle,
     save_predictions,
 )
+from tqdm import tqdm
 
 torch.manual_seed(2023)
 np.random.seed(2023)
@@ -114,6 +114,64 @@ def assign_proteins_to_buckets(config):
     LOG.info(f'Saved predictions per class in `{config.output_predictions}`')
 
 
+def create_buckets(
+    output_chunks, output_predictions, input_path, model_dir_path, output_bucket_path, chunk_size=1000000
+):
+    """
+    Create buckets for protein IDs based on model predictions.
+
+    Args:
+    output_chunks (str): Path to a folder where temporary (per class + per slice) predictions will be saved.
+    output_predictions (str): Path to a folder where the per bucket objects will be saved.
+    input_path (str): Path to the dataset.
+    model_dir_path (str): Path to the model.
+    output_bucket_path (str): Path to output bucket data.
+    chunk_size (int): Chunk size for processing data.
+
+    Returns:
+    None
+    """
+    assert output_chunks is not None
+    assert output_predictions is not None
+
+    LOG.info('Saving predictions per chunk and class')
+
+    # the dir can be models/<dirs> or <specific-model-dir>/checkpoint.pt
+    files = listdir(model_dir_path)
+
+    if not any([f.endswith('.pt') for f in listdir(model_dir_path)]):
+        model_dir_path = load_newest_file_in_dir(model_dir_path)
+
+    args = argparse.Namespace(
+        output_chunks=output_chunks,
+        output_predictions=output_predictions,
+        input=input_path,
+        model_dir_path=model_dir_path,
+        output_bucket_path=output_bucket_path,
+        chunk_size=chunk_size,
+    )
+
+    assign_proteins_to_buckets(args)
+
+    LOG.info('Loading all data')
+    df = load_all_embeddings(input_path)
+
+    create_dir(output_bucket_path)
+
+    LOG.info(f'Saving predictions per bucket in `{output_bucket_path}`')
+    for f in tqdm(listdir(output_predictions)):
+        data_subset = df[df.index.isin(load_pickle(f'{output_predictions}/{f}'))]
+        save_pickle(f'{output_bucket_path}/{f}', data_subset)
+
+    LOG.info(f'Saved predictions per bucket in `{output_bucket_path}`')
+
+    LOG.info(f'Removing temporary files in `{output_chunks}`, `{output_predictions}`')
+    remove_dir(output_chunks)
+    remove_dir(output_predictions)
+
+    LOG.info('Done')
+
+
 '''
 The script loads a model and assigns protein IDs to buckets based on the model's predictions.
 
@@ -134,73 +192,34 @@ python create-buckets.py \
     --model-dir-path "./data/models/"
 '''
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(description="Create buckets for protein IDs based on model predictions")
     parser.add_argument(
         '--output-chunks',
         type=str,
-        default=('./data/chunks'),
-        help=(
-            'Path to a folder where temporary (per class + per slice) '
-            'predictions will be saved (without the / at the end)'
-        ),
+        default='./data/chunks',
+        help='Path to a folder where temporary (per class + per slice) predictions will be saved (without the / at the end)',
     )
     parser.add_argument(
         '--output-predictions',
         type=str,
-        default=('./data/overall'),
+        default='./data/overall',
         help='Path to a folder where the per bucket objects will be saved (without the / at the end)',
     )
+    parser.add_argument('--input', type=str, default='./data/embeddings', help='Path to the dataset')
+    parser.add_argument('--model-dir-path', type=str, default='./data/models/', help='Path to the model')
     parser.add_argument(
-        '--input',
-        type=str,
-        default='./data/embeddings',
-        help='Path to the dataset',
-    )
-    parser.add_argument(
-        '--model-dir-path',
-        type=str,
-        default=('./data/models/'),
-        help='Path to the model',
-    )
-    parser.add_argument(
-        '--output-bucket-path',
-        type=str,
-        default='./data/bucket-data/',
-        help='path to output bucket data',
+        '--output-bucket-path', type=str, default='./data/bucket-data/', help='path to output bucket data'
     )
     parser.add_argument('--chunk-size', type=int, default=1000000, help='Chunk size')
-
     args = parser.parse_args()
-
-    assert args.output_chunks is not None
-    assert args.output_predictions is not None
 
     logging.basicConfig(level=logging.INFO, format='[%(asctime)s][%(levelname)-5.5s][%(name)-.20s] %(message)s')
 
-    LOG.info('Saving predictions per chunk and class')
-
-    # the dir can be models/<dirs> or <specific-model-dir>/checkpoint.pt
-    files = listdir(args.model_dir_path)
-
-    if not any([f.endswith('.pt') for f in listdir(args.model_dir_path)]):
-        args.model_dir_path = load_newest_file_in_dir(args.model_dir_path)
-
-    assign_proteins_to_buckets(args)
-
-    LOG.info('Loading all data')
-    df = load_all_embeddings(args.input)
-
-    create_dir(args.output_bucket_path)
-
-    LOG.info(f'Saving predictions per bucket in `{args.output_bucket_path}`')
-    for f in tqdm(listdir(args.output_predictions)):
-        data_subset = df[df.index.isin(load_pickle(f'{args.output_predictions}/{f}'))]
-        save_pickle(f'{args.output_bucket_path}/{f}', data_subset)
-
-    LOG.info(f'Saved predictions per bucket in `{args.output_bucket_path}`')
-
-    LOG.info(f'Removing temporary files in `{args.output_chunks}`, `{args.output_predictions}`')
-    remove_dir(args.output_chunks)
-    remove_dir(args.output_predictions)
-
-    LOG.info('Done')
+    create_buckets(
+        args.output_chunks,
+        args.output_predictions,
+        args.input,
+        args.model_dir_path,
+        args.output_bucket_path,
+        args.chunk_size,
+    )

@@ -2,8 +2,7 @@ import logging
 
 import faiss
 import numpy as np
-
-from utils import measure_memory_usage, measure_runtime
+from alphafind_training.utils import measure_memory_usage, measure_runtime
 
 np.random.seed(2023)
 

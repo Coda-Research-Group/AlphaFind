@@ -57,20 +57,16 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r training/requirements.txt
         pip install pytest pytest-cov
+        cd training && pip install -e .
 
     - name: Run tests with pytest and generate coverage
       run: |
-        cd training
-        pytest --cov=. --cov-report=xml --cov-report=term-missing
+        cd /home/runner/work/AlphaFind/AlphaFind/training
+        export PYTHONPATH=$PYTHONPATH:$(pwd)
+        pytest -v --cov=. --cov-report=xml --cov-report=term-missing
 
     - name: Upload coverage report
       uses: actions/upload-artifact@v4
       with:
         name: coverage-report
         path: training/coverage.xml
-
-    - name: Upload coverage to Codecov
-      uses: codecov/codecov-action@v3
-      with:
-        file: ./training/coverage.xml
-        fail_ci_if_error: true
