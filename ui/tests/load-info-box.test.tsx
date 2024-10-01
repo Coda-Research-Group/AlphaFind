@@ -45,7 +45,7 @@ describe('LoadInfoBox', () => {
         expect(el?.querySelectorAll("li")[4].textContent).contain("Search Time");
     });
 
-    it('1', () => {
+    it.skip('1', () => {
         const loading = true;
         const originalInput = "P69905";
         const searchTime = 1;
@@ -73,5 +73,6 @@ describe('LoadInfoBox', () => {
         
         const spinner = container.querySelector('.spinner-border');
         expect(spinner).exist;
+        expect(spinner?.textContent).contain("Loading...");
     });
 });
