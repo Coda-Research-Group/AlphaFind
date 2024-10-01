@@ -25,12 +25,20 @@ jobs:
 
     - name: Install UI dependencies
       working-directory: ./ui
-      run: npm ci
+      run: |
+        npm ci
+        npm install --save-dev @vitest/coverage-v8
 
-    - name: Run UI tests
+    - name: Run tests with coverage
       working-directory: ./ui
-      run: npm test
+      run: npm run test:coverage
 
+    - name: Archive code coverage results
+      uses: actions/upload-artifact@v3
+      with:
+        name: code-coverage-report
+        path: ui/coverage/
+  
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v3
 
