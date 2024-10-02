@@ -6,24 +6,92 @@ import faiss
 import numpy as np
 import torch
 import wandb
-
-from model import LIDataset, load_model, save_model
-from utils import create_dir, dir_exists, file_exists, get_current_timestamp
+from alphafind_training.model import LIDataset, load_model, save_model
+from alphafind_training.utils import (
+    create_dir,
+    dir_exists,
+    file_exists,
+    get_current_timestamp,
+)
 
 torch.manual_seed(2023)
 np.random.seed(2023)
 
 LOG = logging.getLogger(__name__)
-logging.basicConfig(level=logging.INFO, format='[%(asctime)s][%(levelname)-5.5s][%(name)-.20s] %(message)s')
 
 
-def run_training(config):
-    with wandb.init(
-        project='small-data-training',
-        entity='protein-db',
-        config=config,
-        settings=wandb.Settings(start_method='thread'),
-    ):
+def train_model(
+    input_path,
+    output_model_dir,
+    kmeans_path,
+    model='MLP',
+    model_path=None,
+    epochs=10,
+    n_classes=2,
+    batch_size=32,
+    dimensionality=45,
+    wandb_project='small-data-training',
+    wandb_entity='protein-db',
+):
+    """
+    Train a model on the embeddings dataset.
+
+    Args:
+        input_path (str): Path to the embeddings pickle file or directory of pickle files
+        output_model_dir (str): Path to the output model directory
+        kmeans_path (str): Path to the k-means model
+        model (str): Model to use (default: 'MLP')
+        model_path (str): Path to the trained model if using a pretrained model (default: None)
+        epochs (int): Number of epochs (default: 10)
+        n_classes (int): Number of classes to use (default: 2)
+        batch_size (int): Batch size (default: 32)
+        dimensionality (int): Number of dimensions of the data (default: 45)
+        wandb_project (str): W&B project name (default: 'small-data-training')
+        wandb_entity (str): W&B entity name (default: 'protein-db')
+
+    Returns:
+        None
+    """
+    pretrained = model_path is not None
+    if not dir_exists(output_model_dir):
+        create_dir(output_model_dir)
+
+    if model_path is not None:
+        assert file_exists(model_path) or dir_exists(model_path), 'Model file or dir does not exist'
+    assert file_exists(kmeans_path), 'K-Means file does not exist'
+
+    timestamp = get_current_timestamp()
+    if pretrained:
+        timestamp = model_path.split('--')[-1]
+    name = str(
+        f'model-{model}--pretrained-{pretrained}--n_classes-{n_classes}--epochs-{epochs}'
+        f'--batchsize={batch_size}--dimensionality-{dimensionality}--{timestamp}'
+    )
+
+    config = argparse.Namespace(
+        input=input_path,
+        output_model_dir=output_model_dir,
+        model=model,
+        model_path=model_path,
+        kmeans_path=kmeans_path,
+        epochs=epochs,
+        n_classes=n_classes,
+        batch_size=batch_size,
+        dimensionality=dimensionality,
+        use_wandb=False,
+        wandb_project=wandb_project,
+        wandb_entity=wandb_entity,
+        name=name,
+    )
+
+    if config.use_wandb:
+
+        wandb.init(
+            project=wandb_project,
+            entity=wandb_entity,
+            config=config,
+            settings=wandb.Settings(start_method='thread'),
+        )
         wandb.run.name = config.name
 
         LOG.info(f'Using config: {config}')
@@ -74,22 +142,12 @@ def run_training(config):
                 losses,
                 f'{config.output_model_dir}/{config.name}/epoch-{epoch+1}.pt',
             )
+    if config.use_wandb:
+        wandb.finish()
 
 
-"""
-This script is used to train a model on the embeddings dataset.
-
-Input: Embeddings pickle file, K-Means object
-Output: Trained model, predictions
-
-EXAMPLE USE:
-WANDB_MODE=offline python train.py\
-    --input ./data/embeddings/\
-    --kmeans-path ./data/kmeans.idx\
-    --output-model-dir ./models/
-"""
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(description="Train a model on the embeddings dataset")
     parser.add_argument(
         '--input', type=str, required=True, help='Path to the embeddings pickle file or directory of pickle files'
     )
@@ -106,19 +164,16 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
 
-    pretrained = args.model_path is not None
-    if not dir_exists(args.output_model_dir):
-        create_dir(args.output_model_dir)
+    logging.basicConfig(level=logging.INFO, format='[%(asctime)s][%(levelname)-5.5s][%(name)-.20s] %(message)s')
 
-    if args.model_path is not None:
-        assert file_exists(args.model_path) or dir_exists(args.model_path), 'Model file or dir does not exist'
-    assert file_exists(args.kmeans_path), 'K-Means file does not exist'
-
-    timestamp = get_current_timestamp()
-    if pretrained:
-        timestamp = args.model_path.split('--')[-1]
-    args.name = str(
-        f'model-{args.model}--pretrained-{pretrained}--n_classes-{args.n_classes}--epochs-{args.epochs}'
-        f'--batchsize={args.batch_size}--dimensionality-{args.dimensionality}--{timestamp}'
+    train_model(
+        input_path=args.input,
+        output_model_dir=args.output_model_dir,
+        kmeans_path=args.kmeans_path,
+        model=args.model,
+        model_path=args.model_path,
+        epochs=args.epochs,
+        n_classes=args.n_classes,
+        batch_size=args.batch_size,
+        dimensionality=args.dimensionality,
     )
-    run_training(args)

@@ -19,24 +19,30 @@ pd.options.mode.chained_assignment = None
 DST_THRESHOLD = 20.0
 
 
-def run(cif_path, output_path, granularity):
+def create_embedding(input_path, output_path, granularity):
     """Calculate all protein descriptors
 
     Args:
-        cif_path (str): path to CIF
-        output_path (str): output file
+        input_path (str or Path): path to CIF directory
+        output_path (str or Path): output file path
         granularity (int): granularity of the descriptors
+
+    Returns:
+        None
     """
-    proteins = os.listdir(cif_path)
-    proteins = [file for file in proteins if file.endswith(".cif")]
+    input_path = Path(input_path)
+    output_path = Path(output_path)
+
+    proteins = [file for file in os.listdir(input_path) if file.endswith(".cif")]
     LOG.info(f'Found {len(proteins)} proteins to create the embedding for')
+
     with Pool() as pool:
         results = []
         data = []
         index = []
 
         for protein in proteins:
-            result = pool.apply_async(process_protein, (cif_path / protein, granularity))
+            result = pool.apply_async(process_protein, (input_path / protein, granularity))
             results.append(result)
 
         LOG.info("Processing started")
@@ -46,7 +52,7 @@ def run(cif_path, output_path, granularity):
         ]
         index = [n for sublist in [result.get()['index'] for result in results] for n in sublist]
         df = pd.DataFrame(index=index, data=data)
-        df.to_pickle(Path(output_path))
+        df.to_pickle(output_path)
         t = time() - t
         LOG.info(f'Processing took {t:.1f} seconds')
         LOG.info(f'Output saved to {output_path}')
@@ -194,17 +200,17 @@ EXAMPLE USE:
 python3 create-embedding.py --input=./data/cifs --output=./data/embedding.pkl --granularity 10
 """
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(description="Create protein descriptors from CIF files")
     parser.add_argument("--input", type=str, required=True, help="Path to the directory containing CIF files")
     parser.add_argument("--output", type=str, required=True, help="Path to the output file")
-    parser.add_argument(
-        "--granularity", type=int, required=False, default=10, help="How detailed should the descriptor be"
-    )
+    parser.add_argument("--granularity", type=int, default=10, help="How detailed should the descriptor be")
 
     args = parser.parse_args()
 
+    logging.basicConfig(level=logging.INFO, format='[%(asctime)s][%(levelname)-5.5s][%(name)-.20s] %(message)s')
+
     input_path = Path(args.input)
     output_path = Path(args.output)
-    assert input_path.exists()
+    assert input_path.exists(), f"Input path {input_path} does not exist"
 
-    run(input_path, output_path, args.granularity)
+    create_embedding(input_path, output_path, args.granularity)

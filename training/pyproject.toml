@@ -5,3 +5,9 @@ line-length = 120
 [tool.isort]
 profile = "black"
 known_third_party = "wandb"
+
+[project]
+name = "alphafind_training"
+version = "0.0.1"
+description = "AlphaFold training -- setup for the similarity search on vast protein data"
+readme = "README.md"

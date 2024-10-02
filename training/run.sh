@@ -1,19 +1,9 @@
-#/bin/bash
+#!/bin/bash
 
-# 1) ---- Create embeddings
-python3 create-embedding.py --input=./data/cifs --output=./data/embedding.pkl --granularity 10
+# Set the base directory
+BASE_DIR="$(dirname "$0")"
+DATA_DIR="$BASE_DIR/data"
+MODELS_DIR="$BASE_DIR/models"
 
-# 2) ---- Create a K-Means object
-# Clusters and saves the k-means object to to `data/kmeans.idx`
-python3 cluster.py --input=./data/embedding.pkl --output=data/kmeans.idx --n-clusters=2
-
-# 3) ---- Train a model
-# Trains and saves a model to `models/`
-python3 train.py --input=./data/embedding.pkl --kmeans-path=data/kmeans.idx --output-model-dir=./models/ --n-classes=2
-
-# 4) ---- Create bucket-data
-# Collects all predictions from the newest model in `models/`, and saves them to `bucket-data/`
-python3 create-buckets.py --input=./data/embedding.pkl --model-dir-path=./models/ --output-chunks=./data/chunks --output-predictions=./data/overall --output-bucket-path ./data/bucket-data/
-
-# 5) ---- Create bucket-data mapping to protein IDs
-python3 create-protein-bucket-mapping.py --bucket-path=./data/bucket-data/ --output=./data/bucket-mapping.pkl
+# Run the train_alphafind.py script
+python3 "$BASE_DIR/train_alphafind.py" --base-dir="$BASE_DIR" --data-dir="$DATA_DIR" --models-dir="$MODELS_DIR"

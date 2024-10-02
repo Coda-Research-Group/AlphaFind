@@ -11,3 +11,6 @@ data/bucket-*
 data/embedding.pkl
 data/kmeans.idx
 models/
+.coverage
+coverage.xml
+*.egg-info
