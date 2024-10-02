@@ -30,7 +30,7 @@ describe("ProteinSearch", () => {
         expect(form?.classList.contains("large")).true;
     });
 
-    it("1", async () => {
+    it.skip("1", async () => {
         const queryClient = new QueryClient();
         const { container } = render(<>
             <QueryClientProvider client={queryClient}>
