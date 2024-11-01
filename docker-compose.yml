@@ -20,7 +20,7 @@ services:
   alphafind-api:
     build:
       context: ./api
-      dockerfile: ./server/Dockerfile
+      dockerfile: ./env/Dockerfile_local
     image: alphafind/api:compose
     pull_policy: build
     container_name: af-api
@@ -31,6 +31,7 @@ services:
       - ./training/data:/data
       - ./training/models:/models
       - ./api/eph:/eph
+      - ./api/src:/home/user/src
     healthcheck:
       test: curl -f http://localhost:8000/ready || exit 1
       interval: 1m30s
