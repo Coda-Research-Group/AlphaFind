@@ -8,8 +8,8 @@ import faiss
 import pandas as pd
 import torch
 
-from model import NeuralNetwork, data_X_to_torch
-from utils import dir_exists, file_exists, load_newest_file_in_dir, load_pickle
+from api.src.model import NeuralNetwork, data_X_to_torch
+from api.src.utils import dir_exists, file_exists, load_newest_file_in_dir, load_pickle
 
 LOG = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO, format='[%(asctime)s][%(levelname)-5.5s][%(name)-.20s] %(message)s')
