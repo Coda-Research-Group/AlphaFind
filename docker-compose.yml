@@ -6,7 +6,7 @@ services:
     build:
       context: ./training
       dockerfile: Dockerfile
-    image: alphafind/training:latest
+    image: alphafind/training:compose
     pull_policy: build
     container_name: af-t
     restart: no
@@ -21,7 +21,7 @@ services:
     build:
       context: ./api
       dockerfile: ./server/Dockerfile
-    image: alphafind/api:latest
+    image: alphafind/api:compose
     pull_policy: build
     container_name: af-api
     restart: unless-stopped
@@ -48,7 +48,7 @@ services:
     build:
       context: ./ui
       dockerfile: Dockerfile
-    image: alphafind/ui:latest
+    image: alphafind/ui:compose
     pull_policy: build
     container_name: af-ui
     restart: unless-stopped
