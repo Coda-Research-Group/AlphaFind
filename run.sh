@@ -4,13 +4,13 @@
 (
     cd training || exit 1
 
-    docker build -t alphafind/training:run -f ./Dockerfile .
+    docker build -t alphafind/training:legacy -f ./Dockerfile .
 
     docker run \
         -v /$(pwd)/data:/training/data \
         -v /$(pwd)/models:/training/models \
         -e WANDB_MODE=offline \
-        alphafind/training:run
+        alphafind/training:legacy
 )
 
 # API
@@ -21,22 +21,22 @@
     ln -s ../training/models models
     ln -s ../training/data data
 
-    docker build -t alphafind/api:run -f ./server/Dockerfile .
+    docker build -t alphafind/api:legacy -f ./server/Dockerfile .
 
     # Run the server in the background
     docker run -d -p 8080:8000 \
         -v /$(pwd)/data:/data \
         -v /$(pwd)/models:/models \
         -v /$(pwd)/eph:/eph \
-        alphafind/api:run
+        alphafind/api:legacy
 )
 
 # UI
 (
     cd ui || exit 3
 
-    docker build -t alphafind/ui:run -f ./Dockerfile .
+    docker build -t alphafind/ui:legacy -f ./Dockerfile .
 
     # Run the UI in the background
-    docker run -d -p 8081:8081 alphafind/ui:run
+    docker run -d -p 8081:8081 alphafind/ui:legacy
 )
