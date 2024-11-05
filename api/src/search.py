@@ -8,8 +8,8 @@ import faiss
 import pandas as pd
 import torch
 
-from api.src.model import NeuralNetwork, data_X_to_torch
-from api.src.utils import dir_exists, file_exists, load_newest_file_in_dir, load_pickle
+from model import NeuralNetwork, data_X_to_torch
+from utils import dir_exists, file_exists, load_newest_file_in_dir, load_pickle
 
 LOG = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO, format='[%(asctime)s][%(levelname)-5.5s][%(name)-.20s] %(message)s')
@@ -17,7 +17,7 @@ logging.basicConfig(level=logging.INFO, format='[%(asctime)s][%(levelname)-5.5s]
 # (Protein ID, TM-Score, RMSD)
 ProteinWithScores = Tuple[str, float, float]
 
-PROTEIN_ID_TO_POSITION_FILE_PATH = '/data/bucket-mapping.pkl'
+PROTEIN_ID_TO_POSITION_FILE_PATH = '../data/bucket-mapping.pkl'
 
 # Embeddings grouped by the predicted class ID
 embeddings: Dict[int, pd.DataFrame] = dict()
@@ -133,8 +133,8 @@ def search(
 def setup_in_memory_data_structures(
     n_classes: int = 2,
     model: str = 'MLP',
-    model_path: str = '/models/',
-    bucket_data_path: str = '/data/bucket-data/',
+    model_path: str = '../data/models/',
+    bucket_data_path: str = '../data/bucket-data/',
 ) -> None:
     global root_model
 

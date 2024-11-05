@@ -29,10 +29,10 @@ compute_scores() {
     QUERY_ID=$1
     PROTEIN_ID=$2
 
-    QUERY_PROTEIN_PATH="/data/cifs/AF-${QUERY_ID}-F1-model_v3.cif"
-    DATASET_EXCTRACTED_PROTEIN_PATH="/data/cifs/AF-${PROTEIN_ID}-F1-model_v3.cif"
+    QUERY_PROTEIN_PATH="/home/user/data/cifs/AF-${QUERY_ID}-F1-model_v3.cif"
+    DATASET_EXCTRACTED_PROTEIN_PATH="/home/user/data/cifs/AF-${PROTEIN_ID}-F1-model_v3.cif"
 
-    /home/alphafind/USalign "${QUERY_PROTEIN_PATH}" "${DATASET_EXCTRACTED_PROTEIN_PATH}" -outfmt 2 | tail -n 1 | awk -F ' ' '{print $3,$5,$8,$9,$11}' >"/eph/partial_scores/${QUERY_ID}/${PROTEIN_ID}.txt"
+    /home/user/usalign/USalign "${QUERY_PROTEIN_PATH}" "${DATASET_EXCTRACTED_PROTEIN_PATH}" -outfmt 2 | tail -n 1 | awk -F ' ' '{print $3,$5,$8,$9,$11}' >"/eph/partial_scores/${QUERY_ID}/${PROTEIN_ID}.txt"
 }
 export -f compute_scores
 

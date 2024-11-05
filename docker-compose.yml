@@ -19,8 +19,8 @@ services:
       - alphafind
   alphafind-api:
     build:
-      context: ./api
-      dockerfile: ./env/Dockerfile_local
+      context: ./
+      dockerfile: ./api/env/Dockerfile_local
     image: alphafind/api:compose
     pull_policy: build
     container_name: af-api
@@ -28,8 +28,7 @@ services:
     ports:
       - 8080:8000
     volumes:
-      - ./training/data:/data
-      - ./training/models:/models
+      - ./training/models:/home/user/data/models
       - ./api/eph:/eph
       - ./api/src:/home/user/src
     healthcheck:

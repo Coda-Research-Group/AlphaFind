@@ -6,10 +6,10 @@ import subprocess
 import time
 from typing import List, Tuple
 
-from api.src.search import get_queries_in_queue
-from api.src.utils import remove_file
+from search import get_queries_in_queue
+from utils import remove_file
 
-COMPUTE_SCORES_SCRIPT_PATH = './compute.sh'
+COMPUTE_SCORES_SCRIPT_PATH = '../usalign/compute.sh'
 
 # (Protein ID, TM-Score, RMSD)
 ProteinWithScores = Tuple[str, float, float]

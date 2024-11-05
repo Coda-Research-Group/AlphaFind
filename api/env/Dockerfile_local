@@ -1,9 +1,8 @@
 FROM python:3.8
 
-ENV LANG en_US.UTF-8
-ENV LANGUAGE en_US:en
-ENV LC_ALL en_US.UTF-8
-
+ENV LANG=en_US.UTF-8
+ENV LANGUAGE=en_US:en
+ENV LC_ALL=en_US.UTF-8
 ENV DEBIAN_FRONTEND=noninteractive
 ENV TZ=Europe/Prague
 
@@ -28,23 +27,20 @@ RUN mkdir -p /var/lib/nginx/body /var/lib/nginx/fastcgi /var/lib/nginx/proxy /va
     && touch /run/nginx.pid \
     && chown -R user:user /run/nginx.pid
 
-COPY requirements.txt .
+COPY ./api/requirements.txt .
 RUN pip install --upgrade pip \
     && pip install torch --index-url https://download.pytorch.org/whl/cu118 \
     && pip install -r requirements.txt \
     && rm -rf ~/.cache
 
-COPY ./server/nginx.conf /etc/nginx/conf.d/default.conf
-COPY ./server/init.sh .
-COPY ./usalign ./usalign
+COPY ./api/server/nginx.conf /etc/nginx/conf.d/default.conf
+COPY ./api/server/init.sh .
+COPY ./api/usalign ./usalign
+COPY ./api/prep ./prep
+COPY ./training/data ./data
 
-# Adding necessary folders when running locally
-# In k8s env, these folders are mounted as volumes
-COPY ./prep ./prep
 RUN python prep/prepare-proteins-index.py \
-    && mv ./proteins /proteins \
-    && mkdir -p /eph \
-    && chown -R user:user /eph /proteins /home/user
+    && chown -R user:user /home/user
 
 EXPOSE 8000
 USER 1000

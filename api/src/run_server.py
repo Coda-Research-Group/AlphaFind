@@ -7,8 +7,8 @@ import time
 from flask import Flask, jsonify, make_response, request
 from prometheus_client import Counter, Gauge, Summary, generate_latest
 
-from api.src.search import get_queries_in_queue, search, setup_in_memory_data_structures
-from api.src.utils import file_exists
+from search import get_queries_in_queue, search, setup_in_memory_data_structures
+from utils import file_exists
 
 LOG = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO, format='[%(asctime)s][%(levelname)-5.5s][%(name)-.20s] %(message)s')
@@ -30,7 +30,7 @@ CANDIDATE_ANSWER_SIZE = 50
 # Start the worker process (to compute the results in the background)
 subprocess.Popen(
     [
-        'python run-worker.py',
+        'python run_worker.py',
     ],
     shell=True,
     stdin=None,
