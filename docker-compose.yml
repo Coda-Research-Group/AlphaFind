@@ -13,8 +13,8 @@ services:
     environment:
       WANDB_MODE: offline
     volumes:
-      - ./training/data:/training/data
-      - ./training/models:/training/models
+      - "./training/data:/training/data"
+      - "./training/models:/training/models"
     networks:
       - alphafind
   alphafind-api:
@@ -28,9 +28,9 @@ services:
     ports:
       - 8080:8000
     volumes:
-      - ./training/models:/home/user/data/models
-      - ./api/eph:/eph
-      - ./api/src:/home/user/src
+      - "./training/models:/home/user/data/models"
+      - "./api/eph:/eph"
+      - "./api/src:/home/user/src"
     healthcheck:
       test: curl -f http://localhost:8000/ready || exit 1
       interval: 1m30s
