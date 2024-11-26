@@ -7,6 +7,8 @@ from os import listdir
 import numpy as np
 import pandas as pd
 import torch
+from tqdm import tqdm
+
 from alphafind_training.model import LIDatasetPredict, load_model
 from alphafind_training.utils import (
     create_dir,
@@ -18,7 +20,6 @@ from alphafind_training.utils import (
     save_pickle,
     save_predictions,
 )
-from tqdm import tqdm
 
 torch.manual_seed(2023)
 np.random.seed(2023)
@@ -137,7 +138,6 @@ def create_buckets(
     LOG.info('Saving predictions per chunk and class')
 
     # the dir can be models/<dirs> or <specific-model-dir>/checkpoint.pt
-    files = listdir(model_dir_path)
 
     if not any([f.endswith('.pt') for f in listdir(model_dir_path)]):
         model_dir_path = load_newest_file_in_dir(model_dir_path)
@@ -197,7 +197,8 @@ if __name__ == '__main__':
         '--output-chunks',
         type=str,
         default='./data/chunks',
-        help='Path to a folder where temporary (per class + per slice) predictions will be saved (without the / at the end)',
+        help='Path to a folder where temporary (per class + per slice) predictions will be saved '
+        '(without the / at the end)',
     )
     parser.add_argument(
         '--output-predictions',

@@ -6,6 +6,7 @@ import faiss
 import numpy as np
 import torch
 import wandb
+
 from alphafind_training.model import LIDataset, load_model, save_model
 from alphafind_training.utils import (
     create_dir,
@@ -85,7 +86,6 @@ def train_model(
     )
 
     if config.use_wandb:
-
         wandb.init(
             project=wandb_project,
             entity=wandb_entity,
@@ -128,7 +128,7 @@ def train_model(
                 )
             )
             losses.append(loss)
-            
+
             if config.use_wandb:
                 wandb.log({"epoch": epoch + 1, "chunk": chunk + 1, "train_loss": loss})
 
