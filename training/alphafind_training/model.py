@@ -11,6 +11,8 @@ import torch
 import torch.nn.functional as nnf
 import torch.utils.data
 import wandb
+from torch import nn
+
 from alphafind_training.clustering import assign_labels
 from alphafind_training.utils import (
     dir_exists,
@@ -19,7 +21,6 @@ from alphafind_training.utils import (
     load_newest_file_in_dir,
     load_pickle,
 )
-from torch import nn
 
 # set seeds for reproducibility
 torch.manual_seed(2023)

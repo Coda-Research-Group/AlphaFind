@@ -2,8 +2,9 @@ import argparse
 import logging
 import os
 
-from alphafind_training.utils import load_pickle, save_pickle
 from tqdm import tqdm
+
+from alphafind_training.utils import load_pickle, save_pickle
 
 LOG = logging.getLogger(__name__)
 

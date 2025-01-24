@@ -6,6 +6,7 @@ import faiss
 import numpy as np
 import torch
 import wandb
+
 from alphafind_training.model import LIDataset, load_model, save_model
 from alphafind_training.utils import (
     create_dir,
@@ -85,7 +86,6 @@ def train_model(
     )
 
     if config.use_wandb:
-
         wandb.init(
             project=wandb_project,
             entity=wandb_entity,
@@ -94,54 +94,57 @@ def train_model(
         )
         wandb.run.name = config.name
 
-        LOG.info(f'Using config: {config}')
+    LOG.info(f'Using config: {config}')
 
-        # load the k-means object created running cluster.py
-        LOG.info(f'Loading k-means object from {config.kmeans_path}')
-        kmeans_index = faiss.read_index(config.kmeans_path)
+    # load the k-means object created running cluster.py
+    LOG.info(f'Loading k-means object from {config.kmeans_path}')
+    kmeans_index = faiss.read_index(config.kmeans_path)
 
-        if not dir_exists(config.input) and file_exists(config.input):
-            n_chunks = 1
-        else:
-            n_chunks = len([f for f in os.listdir(config.input) if f.endswith('.pkl')])
-        nn, _ = load_model(config.model_path, config.dimensionality, config.n_classes, config.model)
+    if not dir_exists(config.input) and file_exists(config.input):
+        n_chunks = 1
+    else:
+        n_chunks = len([f for f in os.listdir(config.input) if f.endswith('.pkl')])
+    nn, _ = load_model(config.model_path, config.dimensionality, config.n_classes, config.model)
 
-        LOG.info(f'Starting training with epochs={config.epochs}, n_chunks={n_chunks}')
-        losses = []
-        for epoch in range(config.epochs):
-            for chunk in range(n_chunks):
-                dataset = LIDataset(config.input, chunk, kmeans_index)
+    LOG.info(f'Starting training with epochs={config.epochs}, n_chunks={n_chunks}')
+    losses = []
+    for epoch in range(config.epochs):
+        for chunk in range(n_chunks):
+            dataset = LIDataset(config.input, chunk, kmeans_index)
 
-                train_loader = torch.utils.data.DataLoader(
-                    dataset,
-                    batch_size=config.batch_size,
-                    sampler=torch.utils.data.SubsetRandomSampler(
-                        np.arange(0, len(dataset), 1),
-                    ),
+            train_loader = torch.utils.data.DataLoader(
+                dataset,
+                batch_size=config.batch_size,
+                sampler=torch.utils.data.SubsetRandomSampler(
+                    np.arange(0, len(dataset), 1),
+                ),
+            )
+
+            loss = nn.train_chunk(train_loader, wandb_summary=wandb.run.summary if config.use_wandb else None)
+            LOG.info(
+                str(
+                    f'--- Loss: {loss:.5f} for Epoch: {epoch+1} | Chunk: {chunk+1}/{n_chunks}'
+                    f' | Data: {dataset.path} | Data shape: {dataset.data.shape}---'
                 )
+            )
+            losses.append(loss)
 
-                loss = nn.train_chunk(train_loader, wandb_summary=wandb.run.summary)
-                LOG.info(
-                    str(
-                        f'--- Loss: {loss:.5f} for Epoch: {epoch+1} | Chunk: {chunk+1}/{n_chunks}'
-                        f' | Data: {dataset.path} | Data shape: {dataset.data.shape}---'
-                    )
-                )
-                losses.append(loss)
+            if config.use_wandb:
                 wandb.log({"epoch": epoch + 1, "chunk": chunk + 1, "train_loss": loss})
-                save_model(
-                    nn.model,
-                    nn.optimizer,
-                    losses,
-                    f'{config.output_model_dir}/{config.name}/epoch-{epoch+1}-chunk-{chunk+1}.pt',
-                )
 
             save_model(
                 nn.model,
                 nn.optimizer,
                 losses,
-                f'{config.output_model_dir}/{config.name}/epoch-{epoch+1}.pt',
+                f'{config.output_model_dir}/{config.name}/epoch-{epoch+1}-chunk-{chunk+1}.pt',
             )
+
+        save_model(
+            nn.model,
+            nn.optimizer,
+            losses,
+            f'{config.output_model_dir}/{config.name}/epoch-{epoch+1}.pt',
+        )
     if config.use_wandb:
         wandb.finish()
 

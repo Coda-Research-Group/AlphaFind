@@ -7,6 +7,8 @@ pod_.yaml
 secret.yaml
 kubectl
 *.h5
-data/
 eph/*/
-models/
+
+# Ignore symlinks created during pipeline
+data
+models

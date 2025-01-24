@@ -1,0 +1,67 @@
+# Image name format from: https://docs.docker.com/reference/compose-file/services/#image
+# [<registry>/][<project>/]<image>[:<tag>|@<digest>]
+
+services:
+  alphafind-training:
+    build:
+      context: ./training
+      dockerfile: Dockerfile
+    image: alphafind/training:compose
+    pull_policy: build
+    container_name: af-t
+    restart: no
+    environment:
+      WANDB_MODE: offline
+    volumes:
+      - "./training/data:/training/data"
+      - "./training/models:/training/models"
+    networks:
+      - alphafind
+  alphafind-api:
+    build:
+      context: ./
+      dockerfile: ./api/env/Dockerfile_local
+    image: alphafind/api:compose
+    pull_policy: build
+    container_name: af-api
+    restart: unless-stopped
+    ports:
+      - 8080:8000
+    volumes:
+      - "./training/models:/home/user/data/models"
+      - "./api/eph:/eph"
+      - "./api/src:/home/user/src"
+    healthcheck:
+      test: curl -f http://localhost:8000/ready || exit 1
+      interval: 1m30s
+      timeout: 25s
+      retries: 5
+      start_period: 30s
+    depends_on:
+      alphafind-training:
+        condition: service_completed_successfully
+        restart: true
+        required: true
+    networks:
+      - alphafind
+  alphafind-ui:
+    build:
+      context: ./ui
+      dockerfile: Dockerfile
+    image: alphafind/ui:compose
+    pull_policy: build
+    container_name: af-ui
+    restart: unless-stopped
+    ports:
+      - 8081:8081
+    depends_on:
+      alphafind-api:
+        condition: service_healthy
+        restart: true
+        required: true
+    networks:
+      - alphafind
+
+networks:
+  alphafind:
+    attachable: true

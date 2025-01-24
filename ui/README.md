@@ -7,15 +7,12 @@ This repository contains the source code of the AlphaFind's front-end.
 
 ## Running locally
 
-```shell
-# Build the docker image
-docker build -t alphafind:ui -f ./Dockerfile .
-
-# Run the AlphaFind UI
-docker run -p 8081:8081 alphafind:ui
+1. Build and run AlphaFind UI Docker image:
+```sh
+docker compose up --build alphafind-ui
 ```
 
-The app will be available at [http://localhost:8081](http://localhost:8081).
+2. The app will be available at [http://localhost:8081](http://localhost:8081).
 
 ## Development
 ### Prerequisites

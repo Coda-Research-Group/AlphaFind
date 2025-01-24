@@ -30,7 +30,7 @@ CANDIDATE_ANSWER_SIZE = 50
 # Start the worker process (to compute the results in the background)
 subprocess.Popen(
     [
-        'python run-worker.py',
+        'python run_worker.py',
     ],
     shell=True,
     stdin=None,

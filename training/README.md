@@ -4,20 +4,9 @@
 1. Build the training image
 `docker build -t alphafind:train -f ./Dockerfile .`
 
-2. Run the training inside the container
-```bash
-docker run \
-    -v ./data:/training/data \
-    -v ./models:/training/models \
-    -e WANDB_MODE=offline \
-    alphafind:train
-```
-Note: In **Windows**, you may need to use absolute paths instead of relative paths, e.g.:
-```bash
-docker run \
-    -v C:\\alphafind-training\\data:/training/data
-    -v C:\\alphafind-training\\models:/training/models
-    alphafind:train
+2. Run the training inside the container:
+```sh
+docker compose up --build alphafind-training
 ```
 
 3. After running, you'll have the following files/folders:

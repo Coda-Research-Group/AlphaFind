@@ -35,24 +35,22 @@ Prerequisites / Dependencies:
 ### Steps
 
 1. Clone this repository:
-```
+```sh
 git clone https://github.com/Coda-Research-Group/AlphaFind.git
 ```
-2. Add execute permissions to the `run.sh` script:
-```
-chmod +x run.sh
-```
-3. Run `run.sh` in your terminal, which will do the following:
-  - build the docker image for `api/`, `ui/` and `training/`
-  - run the `training/` container to prepare the necessary data structures
-  - run the `api/` container (the backend)
-  - run the `ui/` container (the frontend)
 
-```
-./run.sh
+2. Run Docker compose, which will do the following:
+  - build the docker image for `api/`, `ui/` and `training/`,
+  - run the `training/` container to prepare the necessary data structures,
+  - run the `api/` container (the backend),
+  - run the `ui/` container (the frontend).
+
+Use `-d` switch for a detached process.
+```sh
+docker compose up --build
 ```
 
-4. Open `http://localhost:8081` in your browser
+4. Open `http://localhost:8081` in your browser.
 
 ### Data use
 
@@ -66,7 +64,7 @@ To use your own protein data:
 For the full AlphaFold DB, download it from [here](https://alphafold.ebi.ac.uk/download) and place the files in the same directory.
 
 
-**Tested on**: Ubuntu 22.04 LTS
+**Tested on**: Ubuntu 22.04 LTS, Fedora Linux 40 (Workstation Edition)
 
 ## Cite Us
 If you use AlphaFind in your research, please cite the following publication:
