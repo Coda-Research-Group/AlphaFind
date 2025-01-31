@@ -1,9 +1,10 @@
 import argparse
 import logging
 import os
+import subprocess
+import time
 from multiprocessing import Pool
 from pathlib import Path
-from time import time
 
 import numpy as np
 import pandas as pd
@@ -16,16 +17,90 @@ np.random.seed(2023)
 
 pd.options.mode.chained_assignment = None
 
-DST_THRESHOLD = 20.0
+
+def plytoobj(filename):
+    obj_filename = filename[:-4] + ".obj"
+    obj_file = open(obj_filename, "w")
+
+    with open(filename) as ply_file:
+        ply_file_content = ply_file.read().split("\n")[:-1]
+
+        for content in ply_file_content:
+            content_info = content.split()
+            if len(content_info) == 6:
+                vertex_info = "v " + " ".join(content_info[0:3])
+                obj_file.write(vertex_info + "\n")
+            elif len(content_info) == 7:
+                vertex1, vertex2, vertex3 = map(int, content_info[1:4])
+                vertex1, vertex2, vertex3 = vertex1 + 1, vertex2 + 1, vertex3 + 1
+                face_info = "f " + str(vertex1) + " " + str(vertex2) + " " + str(vertex3)
+                obj_file.write(face_info + "\n")
+
+        obj_file.close()
 
 
-def create_embedding(input_path, output_path, granularity):
-    """Calculate all protein descriptors
+def process_protein(it):
+    start_time = time.time()
+
+    path, protein_file = it
+    protein_file = str(protein_file)
+    protein_name = protein_file.split("-")[1]
+
+    # Convert from .cif -> .pdb
+    subprocess.run(["python3", "./alphafind_training/mmcif_to_pdb.py", "--ciffile", protein_file])
+
+    # Convert to .ply -> .obj -> .grid -> Zernike descriptors
+    subprocess.run(
+        [
+            "./alphafind_training/bin/EDTSurf",
+            "-i",
+            f"{protein_file}.pdb",
+            "-h",
+            "2",
+            "-f",
+            "1",
+            "-o",
+            f"{path}{protein_name}",
+        ]
+    )
+    plytoobj(f"{path}{protein_name}.ply")
+    subprocess.run(["./alphafind_training/bin/obj2grid", "-g", "64", f"{path}{protein_name}.obj"])
+    subprocess.run(
+        [
+            "./alphafind_training/bin/map2zernike",
+            f"{path}{protein_name}.obj.grid",
+            "-c",
+            "0.5",
+        ]
+    )
+
+    # Convert to vector
+    with open(f"{path}{protein_name}.obj.grid.inv") as f:
+        embedding = [float(x.strip()) for x in f.readlines()[1:]]
+
+    # Clean up
+    subprocess.run(
+        [
+            "rm",
+            f"{path}{protein_name}.ply",
+            f"{path}{protein_name}.obj",
+            f"{path}{protein_name}.obj.grid",
+            f"{path}{protein_name}.obj.grid.inv",
+            f"{path}{protein_name}-cav.pdb",
+            f"{protein_file}.pdb"
+        ]
+    )
+
+    LOG.info(f"Processed {protein_name} in {time.time() - start_time:.2f} seconds")
+    return protein_name, embedding
+
+
+def create_embedding(input_path, output_path):
+    """Calculate all protein descriptors using the new method
 
     Args:
-        input_path (str or Path): path to CIF directory
-        output_path (str or Path): output file path
-        granularity (int): granularity of the descriptors
+        input_path (str or Path): Path to CIF directory
+        output_path (str or Path): Path to save embeddings as a parquet file
 
     Returns:
         None
@@ -34,7 +109,7 @@ def create_embedding(input_path, output_path, granularity):
     output_path = Path(output_path)
 
     proteins = [file for file in os.listdir(input_path) if file.endswith(".cif")]
-    LOG.info(f'Found {len(proteins)} proteins to create the embedding for')
+    LOG.info(f'Found {len(proteins)} proteins to create embeddings for')
 
     with Pool() as pool:
         results = []
@@ -42,168 +117,29 @@ def create_embedding(input_path, output_path, granularity):
         index = []
 
         for protein in proteins:
-            result = pool.apply_async(process_protein, (input_path / protein, granularity))
+            result = pool.apply_async(process_protein, ((input_path, input_path / protein),))
             results.append(result)
 
         LOG.info("Processing started")
-        t = time()
-        data = [
-            n for sublist in [result.get()['data'] for result in tqdm(results, total=len(proteins))] for n in sublist
-        ]
-        index = [n for sublist in [result.get()['index'] for result in results] for n in sublist]
-        df = pd.DataFrame(index=index, data=data)
-        df.to_pickle(output_path)
-        t = time() - t
+        t = time.time()
+        for result in tqdm(results, total=len(proteins)):
+            protein_name, embedding = result.get()
+            index.append(protein_name)
+            data.append(embedding)
+
+        df = pd.DataFrame(index=index, data=data, dtype="float32")
+        # Save as parquet
+        df.to_parquet(output_path)
+
+        t = time.time() - t
         LOG.info(f'Processing took {t:.1f} seconds')
         LOG.info(f'Output saved to {output_path}')
 
 
-def process_protein(protein, granularity):
-    """Create protein descriptor from file
-
-    Args:
-        protein (Path): path to protein file
-        granularity (int): descriptor granularity
-        fstart (_type_): filename protein id start index
-        fend (_type_): filename protein id end index
-
-    Returns:
-        dict: protein chain id and the descriptor
-    """
-    protein_chains = read_and_extract(protein, granularity)
-
-    data_list = []
-    index_list = []
-    for chain, df in protein_chains:
-        desc = create_descriptor(df, granularity)
-        data_list.append(desc)
-        index_list.append(f"{str(protein).split('/')[-1].split('-')[1].upper()}")
-    return {'index': index_list, 'data': data_list}
-
-
-def create_descriptor(chain_df, granularity):
-    """Create protein descriptor from extracted data
-
-    Args:
-        chain_df (DataFrame): extracted protein data
-        granularity (int): granularity of the descriptor
-    """
-
-    def compute_matrix(row):
-        dist = np.linalg.norm(
-            np.array([row['x_x'], row['y_x'], row['z_x']]) - np.array([row['x_y'], row['y_y'], row['z_y']])
-        )
-        return (DST_THRESHOLD - dist) / DST_THRESHOLD if dist <= DST_THRESHOLD else 0.0
-
-    chain_df['key'] = 0
-    chain_df = chain_df.sort_values('normalized_rs')
-    chain_df = pd.merge(chain_df, chain_df, on='key', how='left')
-    chain_df['dist'] = chain_df.apply(lambda row: compute_matrix(row), axis=1)
-
-    chain_df = chain_df.pivot(index='normalized_rs_x', columns='normalized_rs_y', values='dist')
-    nparray = chain_df.to_numpy(dtype='float16')
-    shape = nparray.shape[0]
-    nparray = np.pad(nparray, (0, granularity - shape), "constant")
-    nup = nparray[np.triu_indices(nparray.shape[0], k=1)]
-    return nup
-
-
-def read_and_extract(protein_file, granularity):  # noqa: C901
-    """Extract protein descriptor data from PDB gz file
-
-    Args:
-        protein_file (str): path to protein file
-        granularity (int): descriptor granularity
-    """
-
-    def remap(n, min_, max_):
-        if max_ - min_ >= granularity:
-            return int((n - min_) / (max_ - min_) * (granularity - 1)) + 1
-        return n - min_ + 1
-
-    df = pd.DataFrame(columns=['atom', 'residue', 'chain', 'residue_sequence', 'x', 'y', 'z'])
-
-    atoms = []
-    residues = []
-    chains = []
-    residue_sequences = []
-    xs = []
-    ys = []
-    zs = []
-
-    with open(protein_file, 'rt') as file:
-        model = True
-        for line in file:
-            words = line.split()
-            if len(words) == 0:
-                continue
-            if model and line[0:4] == "ATOM":
-                atoms.append(words[3])
-                residues.append(words[5])
-                chains.append(words[6])
-                if words[6] != "A":
-                    print("Chain is not A")
-                residue_sequences.append(words[8])
-                xs.append(words[10])
-                ys.append(words[11])
-                zs.append(words[12])
-
-    if len(residue_sequences) == 0:
-        return []
-
-    coded_residue_sequences = []
-    index = 1
-    last = residue_sequences[0]
-    for rs in residue_sequences:
-        if rs == last:
-            coded_residue_sequences.append(index)
-        else:
-            index += 1
-            coded_residue_sequences.append(index)
-            last = rs
-
-    df = pd.DataFrame(
-        {
-            'atom': atoms,
-            'residue': residues,
-            'chain': chains,
-            'residue_sequence': coded_residue_sequences,
-            'x': xs,
-            'y': ys,
-            'z': zs,
-        }
-    )
-    df = df.astype({'residue_sequence': int, 'x': float, 'y': float, 'z': float})
-    chains = df['chain'].unique()
-    tables = []
-    for chain in chains:
-        table = df[df["chain"] == chain]
-        min_ = np.min(table["residue_sequence"])
-        max_ = np.max(table["residue_sequence"])
-        table.loc[:, "normalized_rs"] = table.loc[:, "residue_sequence"].apply(lambda x: remap(x, min_, max_))
-        table = table.drop(['residue_sequence'], axis=1)
-        table = table.groupby(['chain', 'normalized_rs'])
-        table = table[["x", "y", "z"]].mean().reset_index()
-        table = table.sort_values(['chain', 'normalized_rs'])
-        tables.append((chain, table))
-    return tables
-
-
-"""
-Script for creating protein descriptors from CIF files.
-Used in AlphaFind to create the protein descriptors used in building an index and fast searching.
-
-Input: Directory containing CIF files
-Output: Pickle file containing the protein descriptors
-
-EXAMPLE USE:
-python3 create-embedding.py --input=./data/cifs --output=./data/embedding.pkl --granularity 10
-"""
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Create protein descriptors from CIF files")
     parser.add_argument("--input", type=str, required=True, help="Path to the directory containing CIF files")
     parser.add_argument("--output", type=str, required=True, help="Path to the output file")
-    parser.add_argument("--granularity", type=int, default=10, help="How detailed should the descriptor be")
 
     args = parser.parse_args()
 
@@ -213,4 +149,4 @@ if __name__ == "__main__":
     output_path = Path(args.output)
     assert input_path.exists(), f"Input path {input_path} does not exist"
 
-    create_embedding(input_path, output_path, args.granularity)
+    create_embedding(input_path, output_path)

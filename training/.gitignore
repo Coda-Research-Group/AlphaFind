@@ -8,7 +8,7 @@ secret.yaml
 kubectl
 *.h5
 data/bucket-*
-data/embedding.pkl
+data/embedding.parquet
 data/kmeans.idx
 models/
 .coverage

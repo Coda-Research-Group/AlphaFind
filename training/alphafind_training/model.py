@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import Tuple
 
 import numpy as np
+import pandas as pd
 import torch
 import torch.nn.functional as nnf
 import torch.utils.data
@@ -204,7 +205,7 @@ class NeuralNetwork:
         input_dim,
         output_dim,
         loss=torch.nn.CrossEntropyLoss,
-        lr=0.1,
+        lr=0.01,
         model_type='MLP',
         class_weight=None,
     ):
@@ -284,7 +285,7 @@ class LIDataset(torch.utils.data.Dataset):
         else:
             self.path = f'{path}/{os.listdir(path)[chunk]}'
         self.kmeans_index = kmeans_index
-        self.data = data_X_to_torch(load_pickle(self.path))
+        self.data = data_X_to_torch(pd.read_parquet(self.path))
         self.labels = data_y_to_torch(assign_labels(self.kmeans_index, self.data))
 
     def __len__(self):
@@ -297,7 +298,7 @@ class LIDataset(torch.utils.data.Dataset):
 class LIDatasetPredict(torch.utils.data.Dataset):
     def __init__(self, path):
         self.path = path
-        self.data_pd = load_pickle(self.path)
+        self.data_pd = pd.read_parquet(self.path)
         self.data = data_X_to_torch(self.data_pd)
 
     def __len__(self):

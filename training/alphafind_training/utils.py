@@ -103,6 +103,11 @@ def save_pickle(pickle_path, data):
             pickle.dump(data, f)
 
 
+def save_parquet(parquet_path, data):
+    if not file_exists(parquet_path):
+        data.to_parquet(parquet_path)
+
+
 def write_row_to_csv(path, row):
     import csv
 
@@ -130,24 +135,24 @@ def load_newest_file_in_dir(dir_path):
 def load_dataset(
     path: str,
     chunk_size: int = 10_000_000,
-    pickle_files_used: list = [],
+    parquet_files_used: list = [],
     shuffle: bool = False,
 ):
     dataset_path = "/".join(path.split("/")[:-1]) if path.endswith("/") else path
-    LOG.info(f"Loading pickle files from: {dataset_path}")
+    LOG.info(f"Loading parquet files from: {dataset_path}")
     assert os.path.isdir(dataset_path), f"{dataset_path} is not a directory"
     data = pd.DataFrame([])
-    emb_pickles = os.listdir(dataset_path)
+    emb_parquets = os.listdir(dataset_path)
     if shuffle:
-        random.shuffle(emb_pickles)
+        random.shuffle(emb_parquets)
     LOG.info(f"Loading chunk_size={chunk_size} proteins.")
-    for i, pickle_file in enumerate(emb_pickles):
-        if pickle_file not in pickle_files_used:
+    for i, parquet_file in enumerate(emb_parquets):
+        if parquet_file not in parquet_files_used and parquet_file.endswith(".parquet"):
             if i % 10 == 0:
                 LOG.info(f"Loaded {data.shape[0]} / {chunk_size} proteins.")
-            data_pd = load_pickle(f"{dataset_path}/{pickle_file}")
+            data_pd = pd.read_parquet(f"{dataset_path}/{parquet_file}")
             data = pd.concat([data, data_pd])
-            pickle_files_used.append(pickle_file)
+            parquet_files_used.append(parquet_file)
             if data.shape[0] >= chunk_size:
                 break
-    return data, pickle_files_used
+    return data, parquet_files_used

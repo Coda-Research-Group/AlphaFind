@@ -25,12 +25,12 @@ def train_model(
     input_path,
     output_model_dir,
     kmeans_path,
-    model='MLP',
+    model='MLP10',
     model_path=None,
-    epochs=10,
+    epochs=30,
     n_classes=2,
     batch_size=32,
-    dimensionality=45,
+    dimensionality=121,
     wandb_project='small-data-training',
     wandb_entity='protein-db',
 ):
@@ -38,7 +38,7 @@ def train_model(
     Train a model on the embeddings dataset.
 
     Args:
-        input_path (str): Path to the embeddings pickle file or directory of pickle files
+        input_path (str): Path to the embeddings parquet file or directory of parquet files
         output_model_dir (str): Path to the output model directory
         kmeans_path (str): Path to the k-means model
         model (str): Model to use (default: 'MLP')
@@ -103,7 +103,7 @@ def train_model(
     if not dir_exists(config.input) and file_exists(config.input):
         n_chunks = 1
     else:
-        n_chunks = len([f for f in os.listdir(config.input) if f.endswith('.pkl')])
+        n_chunks = len([f for f in os.listdir(config.input) if f.endswith('.parquet')])
     nn, _ = load_model(config.model_path, config.dimensionality, config.n_classes, config.model)
 
     LOG.info(f'Starting training with epochs={config.epochs}, n_chunks={n_chunks}')
@@ -152,7 +152,7 @@ def train_model(
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="Train a model on the embeddings dataset")
     parser.add_argument(
-        '--input', type=str, required=True, help='Path to the embeddings pickle file or directory of pickle files'
+        '--input', type=str, required=True, help='Path to the embeddings parquet file or directory of parquet files'
     )
     parser.add_argument('--output-model-dir', type=str, required=True, help='Path to the output model dir')
     parser.add_argument('-m', '--model', type=str, default='MLP', help='Model to use')
@@ -163,7 +163,7 @@ if __name__ == '__main__':
     parser.add_argument('-e', '--epochs', type=int, default=10, help='Number of epochs')
     parser.add_argument('--n-classes', type=int, default=2, help='Number of classes to use')
     parser.add_argument('--batch-size', type=int, default=32, help='Batch size')
-    parser.add_argument('--dimensionality', type=int, default=45, help='Number of dimensions of the data')
+    parser.add_argument('--dimensionality', type=int, default=121, help='Number of dimensions of the data')
 
     args = parser.parse_args()
 

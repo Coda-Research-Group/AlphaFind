@@ -1,6 +1,7 @@
 import logging
 
 import numpy as np
+import pandas as pd
 import torch
 
 from alphafind_training.clustering import run_clustering
@@ -12,12 +13,12 @@ torch.manual_seed(2023)
 np.random.seed(2023)
 
 
-def create_kmeans(input_path, output_path, n_clusters=2, sample_size=108, n_iterations=10):
+def create_kmeans(input_path, output_path, n_clusters=2, sample_size=108, n_iterations=20):
     """
     Function for clustering the embeddings using K-Means.
 
     Args:
-    input_path (str): Path to the embeddings pickle file or directory of pickle files
+    input_path (str): Path to the embeddings parquet file or directory of parquet files
     output_path (str): Path to the output K-Means file
     n_clusters (int): Number of clusters (default: 2)
     sample_size (int): Size of the sample (default: 108)
@@ -29,10 +30,11 @@ def create_kmeans(input_path, output_path, n_clusters=2, sample_size=108, n_iter
     assert file_exists(input_path) or dir_exists(input_path), 'Input file or directory does not exist'
 
     LOG.info('Loading embeddings')
+    LOG.info('from %s', input_path)
     if dir_exists(input_path) and not file_exists(input_path):
         embeddings, _ = load_dataset(input_path, sample_size, shuffle=True)
     else:
-        embeddings = load_pickle(input_path)
+        embeddings = pd.read_parquet(input_path)
 
     assert embeddings.shape[0] >= sample_size, 'Sample size must be smaller than the number of embeddings'
 
@@ -53,7 +55,7 @@ if __name__ == '__main__':
 
     parser = argparse.ArgumentParser(description="Cluster embeddings using K-Means")
     parser.add_argument(
-        '--input', type=str, required=True, help='Path to the embeddings pickle file or directory of pickle files'
+        '--input', type=str, required=True, help='Path to the embeddings parquet file or directory of parquet files'
     )
     parser.add_argument('--output', type=str, required=True, help='Path to the output K-Means file')
     parser.add_argument('--n-clusters', type=int, default=2, help='Number of clusters')
