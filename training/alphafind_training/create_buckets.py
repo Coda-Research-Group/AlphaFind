@@ -25,16 +25,16 @@ torch.manual_seed(2023)
 np.random.seed(2023)
 
 LOG = logging.getLogger(__name__)
-DEFAULT_DIMENSIONALITY = 45
+DEFAULT_DIMENSIONALITY = 121
 
 
 def load_all_embeddings(path):
     df = pd.DataFrame([])
-    if path.endswith('.pkl'):
-        return load_pickle(path)
+    if path.endswith('.parquet'):
+        return pd.read_parquet(path)
     else:
-        for _, emb_file in tqdm(enumerate([f for f in listdir(path) if f.endswith('.pkl')])):
-            objs = load_pickle(f"{path}/{emb_file}")
+        for _, emb_file in tqdm(enumerate([f for f in listdir(path) if f.endswith('.parquet')])):
+            objs = pd.read_parquet(f"{path}/{emb_file}")
             df = pd.concat([df, objs])
     return df
 

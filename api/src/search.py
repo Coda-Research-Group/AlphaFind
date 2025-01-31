@@ -132,7 +132,7 @@ def search(
 
 def setup_in_memory_data_structures(
     n_classes: int = 2,
-    model: str = 'MLP',
+    model: str = 'MLP10',
     model_path: str = '../data/models/',
     bucket_data_path: str = '../data/bucket-data/',
 ) -> None:

@@ -7,7 +7,7 @@ ENV LC_ALL=en_US.UTF-8
 ENV DEBIAN_FRONTEND=noninteractive 
 ENV TZ=Europe/Prague
 
-RUN apt-get update && apt-get install -y libxml2 g++ vim coreutils nano git libxrender1 wget fakeroot tzdata locales && apt-get clean && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y libxml2 g++ vim coreutils nano git libxrender1 wget fakeroot tzdata locales libhdf5-dev && apt-get clean && rm -rf /var/lib/apt/lists/*
 RUN ln -fs /usr/share/zoneinfo/Europe/Prague /etc/localtime && dpkg-reconfigure --frontend noninteractive tzdata && sed -i -e 's/# en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen && locale-gen
 
 COPY requirements.txt /var/requirements.txt

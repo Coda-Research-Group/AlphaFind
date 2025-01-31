@@ -11,19 +11,19 @@ from alphafind_training.train import train_model
 def train_alphafind(base_dir, data_dir, models_dir):
     # 1) Create embeddings
     create_embedding(
-        input_path=os.path.join(data_dir, "cifs"), output_path=os.path.join(data_dir, "embedding.pkl"), granularity=10
+        input_path=os.path.join(data_dir, "cifs"), output_path=os.path.join(data_dir, "embedding.parquet")
     )
 
     # 2) Create a K-Means object
     create_kmeans(
-        input_path=os.path.join(data_dir, "embedding.pkl"),
+        input_path=os.path.join(data_dir, "embedding.parquet"),
         output_path=os.path.join(data_dir, "kmeans.idx"),
         n_clusters=2,
     )
 
     # 3) Train a model
     train_model(
-        input_path=os.path.join(data_dir, "embedding.pkl"),
+        input_path=os.path.join(data_dir, "embedding.parquet"),
         kmeans_path=os.path.join(data_dir, "kmeans.idx"),
         output_model_dir=models_dir,
         n_classes=2,
@@ -31,7 +31,7 @@ def train_alphafind(base_dir, data_dir, models_dir):
 
     # 4) Create bucket-data
     create_buckets(
-        input_path=os.path.join(data_dir, "embedding.pkl"),
+        input_path=os.path.join(data_dir, "embedding.parquet"),
         model_dir_path=models_dir,
         output_chunks=os.path.join(data_dir, "chunks"),
         output_predictions=os.path.join(data_dir, "overall"),

@@ -29,6 +29,7 @@ services:
       - 8080:8000
     volumes:
       - "./training/models:/home/user/data/models"
+      - "./training/data:/home/user/data"
       - "./api/eph:/eph"
       - "./api/src:/home/user/src"
     healthcheck:
