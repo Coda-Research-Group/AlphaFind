@@ -2,11 +2,9 @@ import os
 import re
 import tempfile
 from pathlib import Path
-
 import pandas as pd
 import pytest
 from alphafind_training.create_embedding import create_embedding
-
 
 @pytest.fixture(scope="function")
 def output_file():
@@ -32,17 +30,15 @@ def test_create_embedding():
     with tempfile.TemporaryDirectory() as tmpdir:
         cif_path = "./data/cifs"
         output_path = f"{tmpdir}/embedding.pkl"
-        granularity = 10
 
-        # 45 features for each protein - (10x10 - 10) / 2
-        expected_dimensionality = 45
+        expected_dimensionality = 121
 
-        create_embedding(Path(cif_path), Path(output_path), granularity)
+        create_embedding(Path(cif_path), Path(output_path))
 
         assert os.path.exists(output_path)
         assert os.path.getsize(output_path) > 0
         # load embedding.pkl and check if it has the correct shape
-        df = pd.read_pickle(output_path)
+        df = pd.read_parquet(output_path)
         assert df.shape[0] == len(os.listdir(cif_path))
         assert df.shape[1] == expected_dimensionality
 

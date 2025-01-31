@@ -11,8 +11,7 @@ from alphafind_training.train import train_model
 def _setup(tempdir: str):
     create_embedding(
         input_path=Path("./data/cifs"),
-        output_path=Path(f"{tempdir}/embedding.pkl"),
-        granularity=10
+        output_path=Path(f"{tempdir}/embedding.pkl")
     )
 
     create_kmeans(
