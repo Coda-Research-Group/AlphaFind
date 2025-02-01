@@ -1,10 +1,9 @@
 pandas
 pillow
-keras
+torch
 scikit-learn
 matplotlib
 numpy
-pandas
 pyyaml
 kaleido
 faiss-cpu
