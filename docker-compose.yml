@@ -9,7 +9,7 @@ services:
     image: alphafind/training:compose
     pull_policy: build
     container_name: af-t
-    restart: no
+    restart: "no"
     environment:
       WANDB_MODE: offline
     volumes:
@@ -41,8 +41,6 @@ services:
     depends_on:
       alphafind-training:
         condition: service_completed_successfully
-        restart: true
-        required: true
     networks:
       - alphafind
   alphafind-ui:
@@ -58,8 +56,6 @@ services:
     depends_on:
       alphafind-api:
         condition: service_healthy
-        restart: true
-        required: true
     networks:
       - alphafind
 
