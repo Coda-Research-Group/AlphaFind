@@ -24,7 +24,7 @@ jobs:
       working-directory: ./ui
       run: |
         npm ci
-        npm install --save-dev @vitest/coverage-v8
+        npm install --save-dev @vitest/coverage-v8@3.0.4
 
     - name: Run tests with coverage
       working-directory: ./ui
