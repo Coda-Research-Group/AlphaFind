@@ -18,7 +18,7 @@ jobs:
     - name: Set up Node.js
       uses: actions/setup-node@v3
       with:
-        node-version: '21.6.0'  # Match the version in your Dockerfile
+        node-version: '20.x'
 
     - name: Install UI dependencies
       working-directory: ./ui
