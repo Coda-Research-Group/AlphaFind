@@ -50,12 +50,12 @@ jobs:
       with:
         python-version: '3.x'
 
-    - name: Install dependencies
+    - name: Install Python dependencies (CPU-only, no cache)
       run: |
         python -m pip install --upgrade pip
-        pip install -r training/requirements.txt
-        pip install pytest pytest-cov
-        cd training && pip install -e .
+        pip install --no-cache-dir --extra-index-url https://download.pytorch.org/whl/cpu -r training/requirements.txt
+        pip install --no-cache-dir pytest pytest-cov
+        cd training && pip install --no-cache-dir -e .
 
     - name: Run tests with pytest and generate coverage
       run: |
