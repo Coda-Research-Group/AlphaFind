@@ -11,7 +11,7 @@ export function FilterInfo({ filteredCount, totalCount }: Props) {
 
     return (
         <div className="disabled">
-            Most similar proteins to <i>{queryObject.uniProtId}</i> (showing {filteredCount} filtered out of {totalCount})
+            Most similar proteins to <i>{queryObject?.uniProtId || "unknown"}</i> (showing {filteredCount} filtered out of {totalCount})
         </div>
     );
 }
