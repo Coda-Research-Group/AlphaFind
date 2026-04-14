@@ -1,0 +1,8 @@
+.venv/
+.venv_workshop_test/
+.venv_tmp_test/
+__pycache__/
+*.pyc
+.pytest_cache/
+data/bucket_*.csv
+/viz.png

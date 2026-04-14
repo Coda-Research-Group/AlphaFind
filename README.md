@@ -23,7 +23,9 @@ The codebase is divided into three folders:
 - `training` (model training, index building)
 - `api` (backend)
 - `ui` (frontend)
- 
+
+Self-contained high-school workshop materials (Czech) live in **`workshop/`**; start at [`workshop/README_STUDENT.md`](workshop/README_STUDENT.md).
+
 See the `README.md` files in each folder for more details.
 
 ## Installation and execution

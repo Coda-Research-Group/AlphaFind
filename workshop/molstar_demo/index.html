@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Mol* – demo struktury (workshop)</title>
+  <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/molstar@4.6.0/build/viewer/molstar.css" />
+  <style>
+    html, body { margin: 0; padding: 0; height: 100%; width: 100%; overflow: hidden; font-family: system-ui, sans-serif; }
+    #app { position: absolute; inset: 0; }
+    .hint {
+      position: absolute; top: 8px; left: 8px; z-index: 10;
+      background: rgba(255,255,255,0.92); padding: 8px 12px; border-radius: 8px;
+      font-size: 13px; max-width: min(420px, 90vw); box-shadow: 0 1px 4px rgba(0,0,0,0.15);
+    }
+  </style>
+</head>
+<body>
+  <div class="hint">
+    Malý protein z PDB (1CRN). V AlphaFindu je 3D podobně, ale navázané na výsledky vyhledávání.
+    Stránka stahuje Mol* z CDN a strukturu z internetu – potřebuješ přístup ven.
+  </div>
+  <div id="app"></div>
+  <script src="https://cdn.jsdelivr.net/npm/molstar@4.6.0/build/viewer/molstar.js"></script>
+  <script>
+    molstar.Viewer.create('app', {
+      layoutIsExpanded: true,
+      layoutShowControls: true,
+      layoutShowLeftPanel: true,
+      layoutShowSequence: true,
+      layoutShowLog: false,
+      pdbProvider: 'rcsb',
+    }).then(function (viewer) {
+      return viewer.loadPdb('1crn');
+    });
+  </script>
+</body>
+</html>

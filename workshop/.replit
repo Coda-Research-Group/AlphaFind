@@ -1,0 +1,8 @@
+# Replit – výchozí Run = pipeline v main.py.
+# Mol* zvlášť: v Run přepni na  python molstar_demo/serve.py  a otevři Webview.
+run = "python main.py"
+
+entrypoint = "main.py"
+
+[languages.python3]
+version = "3.11"
